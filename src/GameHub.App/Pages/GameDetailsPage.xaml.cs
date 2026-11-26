@@ -459,3 +459,6 @@ public sealed partial class GameDetailsPage : Page
         return await dialog.ShowAsync() == ContentDialogResult.Primary;
     }
 }
+
+/// <summary>Parâmetro para reabrir o fluxo de busca online para um jogo existente.</summary>
+public sealed record RefreshMetadataRequest(long GameId);

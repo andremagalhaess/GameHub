@@ -2,13 +2,13 @@
 
 Launcher universal de jogos e diário gamer pessoal para **Windows 11**. Nativo (C# / .NET 10 + WinUI 3), leve, com banco de dados local SQLite e sem conta online.
 
-> Estado atual: **Prioridades 1 e 2 concluídas**. As prioridades 3 e 4 estão listadas em [Roadmap](#roadmap).
+> Estado atual: **Prioridades 1, 2 e 3 concluídas**. A prioridade 4 está listada em [Roadmap](#roadmap).
 
 ## O que já funciona
 
 | Área | O que faz |
 |---|---|
-| **Interface** | Janela nativa do Windows 11 com efeito Mica, barra de título integrada, sidebar (Início, Biblioteca, Adicionar jogo, Meu Perfil, Configurações), tema escuro padrão, tema claro, cor de destaque personalizável. |
+| **Interface** | Janela nativa do Windows 11 com efeito Mica, barra de título integrada, sidebar (Início, Biblioteca, Adicionar jogo, Minha Jornada, Meus Rankings, Meu Perfil, Configurações), tema escuro padrão, tema claro, cor de destaque personalizável. |
 | **Adicionar jogo por EXE** | Seleciona qualquer `.exe`, lê Product Name, File Description, Company Name, Original Filename, versão e pasta de instalação e sugere o nome (ex.: `Cyberpunk2077.exe` → *Cyberpunk 2077*). O nome é editável. **O arquivo nunca é executado no cadastro.** |
 | **Busca online** | Botão **BUSCAR INFORMAÇÕES ONLINE** pesquisa ao mesmo tempo na Steam (sem chave), RAWG e IGDB (com chave). Mostra capa, nome, ano, desenvolvedora e resumo de cada resultado. Nada é adicionado sem você escolher. |
 | **Confirmação** | Todos os campos editáveis (nome, descrições, desenvolvedora, publicadora, gêneros, tags, plataformas, data, classificação, site, trailer, status, horas, executável, argumentos, pasta de trabalho, ícone) + galerias para escolher capa, background e logo. Só as artes escolhidas são baixadas, e ficam guardadas localmente (funcionam offline). |
@@ -20,6 +20,9 @@ Launcher universal de jogos e diário gamer pessoal para **Windows 11**. Nativo 
 | **Plataformas** | *Atualizar biblioteca* detecta jogos instalados de Steam, Epic, GOG, Ubisoft Connect, EA app, Battle.net, Riot, Rockstar, Amazon Games e Xbox/PC Game Pass, lendo arquivos e registros locais (sem senha). Com a Steam Web API (opcional), importa também jogos não instalados e as horas oficiais. Um jogo presente em várias lojas vira uma única entrada; jogos removidos não voltam; desinstalados são marcados, nunca apagados. |
 | **Avaliações** | Nota de 0 a 10 (meio ponto), review, pontos positivos e negativos, momentos memoráveis, comentários, tags, datas de início e conclusão. Editável a qualquer momento. |
 | **Filtros** | Nome, status, gênero, plataforma, nota mínima, tempo jogado, favoritos; ordenação por nome, adição, último jogo, horas, lançamento e nota. |
+| **Minha Jornada** | Painel com cards (cadastrados, zerados, em andamento, abandonados, horas, média das notas, gênero favorito, plataforma mais usada, jogo mais bem avaliado) e gráficos de zerados por ano, gêneros e status. **Linha do tempo** agrupada por ano, com filtros por ano, mês ou período personalizado, status, gênero, plataforma, nota e horas. **Meu Ano Gamer**: retrospectiva do ano (jogados, começados, zerados, horas medidas, melhor e pior jogo, gênero e plataforma, zerados por mês, favoritos, reviews) com **exportação em PNG**. **Calendário** mensal com inícios, conclusões, sessões e memórias de cada dia. |
+| **Memórias** | Na página de cada jogo: screenshots, imagens, textos, momentos favoritos, cenas marcantes e observações, com data opcional. As imagens são copiadas para a pasta do GameHub (o original não é alterado). |
+| **Meus Rankings** | 7 rankings iniciais (Top 10 favoritos, melhores de todos os tempos, do ano, histórias, trilhas sonoras, multiplayer, mais marcantes) e rankings próprios. Arrastar e soltar (ou botões subir/descer) para reordenar, limite opcional, **exportação em PNG**. |
 | **Configurações** | Tema, transparência, animações, tamanho das capas, cor; chaves RAWG/IGDB (cifradas com DPAPI); cache de imagens; **backup e restauração** completos (.zip). |
 
 ## Requisitos
@@ -53,8 +56,8 @@ A Steam funciona sem configuração. RAWG e IGDB precisam de credenciais gratuit
 
 `%LOCALAPPDATA%\GameHub\`
 
-- `gamehub.db`: banco SQLite (jogos, perfil, sessões, configurações).
-- `images\`: capas, backgrounds, logos, ícones e fotos (cache local).
+- `gamehub.db`: banco SQLite (jogos, perfil, sessões, reviews, memórias, rankings, configurações).
+- `images\`: capas, backgrounds, logos, ícones, fotos e imagens das memórias.
 - `backups\`: cópias de segurança automáticas antes de cada restauração.
 - `logs\`: apenas erros.
 
@@ -80,5 +83,4 @@ Arquitetura e decisões em [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 
 ## Roadmap
 
-- **Prioridade 3**: Minha Jornada, estatísticas, timeline, Meu Ano Gamer, rankings, calendário, memórias.
 - **Prioridade 4**: HowLongToBeat, Backloggd (CSV), importação/exportação, instalador, otimizações.
