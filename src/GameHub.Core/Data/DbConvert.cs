@@ -10,8 +10,8 @@ internal static class DbConvert
     public static object ToDb(this string? s) => string.IsNullOrWhiteSpace(s) ? DBNull.Value : s.Trim();
     public static object ToDb(this double? d) => d.HasValue ? d.Value : DBNull.Value;
     public static object ToDb(this long? l) => l.HasValue ? l.Value : DBNull.Value;
-    public static object ToDb(this DateTimeOffset? d) => d.HasValue ? d.Value.ToString("O", CultureInfo.InvariantCulture) : DBNull.Value;
-    public static string ToDb(this DateTimeOffset d) => d.ToString("O", CultureInfo.InvariantCulture);
+    public static object ToDb(this DateTimeOffset? d) => d.HasValue ? d.Value.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture) : DBNull.Value;
+    public static string ToDb(this DateTimeOffset d) => d.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture);
 
     public static object ListToDb(IEnumerable<string> items)
     {

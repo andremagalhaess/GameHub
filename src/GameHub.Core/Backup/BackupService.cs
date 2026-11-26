@@ -108,6 +108,18 @@ public sealed class BackupService
             cmd.Parameters.AddWithValue("@old", oldImages);
             cmd.Parameters.AddWithValue("@new", _paths.ImagesDir);
             cmd.ExecuteNonQuery();
+
+            // Memórias (a partir do esquema v3; backups antigos não têm a tabela).
+            using var has = c.CreateCommand();
+            has.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'memories';";
+            if ((long)has.ExecuteScalar()! > 0)
+            {
+                using var mem = c.CreateCommand();
+                mem.CommandText = "UPDATE memories SET image_path = REPLACE(image_path, @old, @new);";
+                mem.Parameters.AddWithValue("@old", oldImages);
+                mem.Parameters.AddWithValue("@new", _paths.ImagesDir);
+                mem.ExecuteNonQuery();
+            }
         }
 
         SqliteConnection.ClearAllPools();

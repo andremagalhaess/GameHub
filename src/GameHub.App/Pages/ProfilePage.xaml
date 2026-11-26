@@ -90,7 +90,7 @@
                     <StackPanel><TextBlock x:Name="StGenre" Style="{StaticResource GhStatValue}" TextTrimming="CharacterEllipsis" /><TextBlock Text="Gênero favorito" Style="{StaticResource GhMuted}" /></StackPanel>
                 </Border>
                 </Grid>
-                <TextBlock Text="Notas pessoais e reviews chegam na próxima etapa (Prioridade 2); até lá, as estatísticas de avaliação ficam vazias." Style="{StaticResource GhMuted}" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap" x:Name="RatingsHint" />
+                <TextBlock Text="Dê notas aos seus jogos em Minha avaliação, na página de cada jogo, para preencher as estatísticas de avaliação." Style="{StaticResource GhMuted}" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap" x:Name="RatingsHint" />
 
             <StackPanel x:Name="FavSection" Visibility="Collapsed">
                 <TextBlock Text="Jogos favoritos" Style="{StaticResource GhSectionTitle}" />

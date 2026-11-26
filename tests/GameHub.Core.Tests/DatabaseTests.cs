@@ -23,7 +23,7 @@ public class DatabaseTests
         using var env = new TestEnv();
         env.Db.Migrate();
         env.Db.Migrate();
-        Assert.Equal(2, env.Db.SchemaVersion);
+        Assert.Equal(3, env.Db.SchemaVersion);
     }
 
     [Fact]

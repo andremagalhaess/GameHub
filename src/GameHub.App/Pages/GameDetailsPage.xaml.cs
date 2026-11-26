@@ -78,6 +78,7 @@ public sealed partial class GameDetailsPage : Page
         if (g.MetadataProvider == RawgProvider.ProviderName) AddLink("Dados fornecidos por", "https://rawg.io", "RAWG");
 
         LoadReview(g);
+        LoadMemories(g);
         LoadPlatforms(g);
         _loading = false;
     }
@@ -316,7 +317,145 @@ public sealed partial class GameDetailsPage : Page
         Info.Message = message;
         Info.IsOpen = true;
     }
-}
 
-/// <summary>Parâmetro para reabrir o fluxo de busca online para um jogo existente.</summary>
-public sealed record RefreshMetadataRequest(long GameId);
+    // ---------- Memórias ----------
+
+    private void LoadMemories(Game g)
+    {
+        MemoriesPanel.Children.Clear();
+        var list = AppServices.Memories.ForGame(g.Id);
+        MemoriesEmpty.Visibility = list.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        foreach (var m in list) MemoriesPanel.Children.Add(MemoryCard(m));
+    }
+
+    private FrameworkElement MemoryCard(GameMemory m)
+    {
+        var stack = new StackPanel { Spacing = 6, Width = 240 };
+        if (ImageHelper.Local(m.ImagePath, 480) is { } img)
+        {
+            var image = new Image { Source = img, Stretch = Microsoft.UI.Xaml.Media.Stretch.UniformToFill, Height = 135 };
+            var frame = new Border { CornerRadius = new CornerRadius(8), Child = image, Height = 135 };
+            ToolTipService.SetToolTip(frame, "Clique para abrir a imagem");
+            frame.Tapped += (_, _) => OpenFile(m.ImagePath!);
+            stack.Children.Add(frame);
+        }
+        var header = (m.Kind.ToDisplay() + (Fmt.ShortDate(m.HappenedAt) is { } d ? " · " + d : "")).ToUpperInvariant();
+        stack.Children.Add(new TextBlock { Text = header, FontSize = 11, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold, CharacterSpacing = 60, Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["GhAccentBrush"] });
+        if (!string.IsNullOrWhiteSpace(m.Title))
+            stack.Children.Add(new TextBlock { Text = m.Title, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap });
+        if (!string.IsNullOrWhiteSpace(m.Text))
+            stack.Children.Add(new TextBlock { Text = m.Text, TextWrapping = TextWrapping.Wrap, MaxLines = 6, TextTrimming = TextTrimming.CharacterEllipsis, IsTextSelectionEnabled = true });
+
+        var edit = new HyperlinkButton { Content = "Editar", Padding = new Thickness(0) };
+        edit.Click += async (_, _) => { if (await EditMemoryAsync(m)) LoadMemories(_game!); };
+        var del = new HyperlinkButton { Content = "Apagar", Padding = new Thickness(0) };
+        del.Click += async (_, _) =>
+        {
+            if (!await Dialogs.ConfirmAsync("Apagar memória?", "A memória será removida do GameHub. A imagem original no seu computador não é afetada.", "Apagar", destructive: true)) return;
+            AppServices.Memories.Delete(m.Id);
+            LoadMemories(_game!);
+        };
+        stack.Children.Add(new StackPanel { Orientation = Orientation.Horizontal, Spacing = 14, Children = { edit, del } });
+
+        return new Border
+        {
+            Child = stack,
+            Padding = new Thickness(12),
+            CornerRadius = new CornerRadius(10),
+            Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["GhCardBrush"],
+            BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["GhCardBorderBrush"],
+            BorderThickness = new Thickness(1),
+        };
+    }
+
+    private static void OpenFile(string path)
+    {
+        // Abre a imagem no visualizador padrão do Windows (é uma imagem, não um executável).
+        if (File.Exists(path)) Process.Start(new ProcessStartInfo { FileName = "explorer.exe", ArgumentList = { path }, UseShellExecute = false });
+    }
+
+    private async void AddMemory_Click(object sender, RoutedEventArgs e)
+    {
+        if (_game is null) return;
+        if (await EditMemoryAsync(new GameMemory { GameId = _game.Id, Kind = MemoryKind.Moment })) LoadMemories(_game);
+    }
+
+    /// <summary>Diálogo de criar/editar memória. Retorna true se salvou.</summary>
+    private async Task<bool> EditMemoryAsync(GameMemory m)
+    {
+        var kind = new ComboBox { Header = "Tipo", MinWidth = 220 };
+        foreach (var k in MemoryKindText.All) kind.Items.Add(new ComboBoxItem { Content = k.ToDisplay(), Tag = k });
+        kind.SelectedIndex = MemoryKindText.All.ToList().IndexOf(m.Kind);
+        var title = new TextBox { Header = "Título", Text = m.Title ?? "", PlaceholderText = "Ex.: Primeira vez que vi o mapa inteiro" };
+        var text = new TextBox { Header = "Texto", Text = m.Text ?? "", AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, Height = 120 };
+        var date = new CalendarDatePicker { Header = "Quando aconteceu (opcional)", PlaceholderText = "Escolher data", Date = Fmt.ToDateTimeOffset(m.HappenedAt) };
+        var imagePath = m.ImagePath;
+        var imageState = new TextBlock { Style = (Style)Application.Current.Resources["GhMuted"], VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 220 };
+        void UpdateImageState() => imageState.Text = imagePath is null ? "Sem imagem" : Path.GetFileName(imagePath);
+        UpdateImageState();
+        var error = new TextBlock { Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["SystemFillColorCriticalBrush"], TextWrapping = TextWrapping.Wrap, Visibility = Visibility.Collapsed };
+        var pick = new Button { Content = "Escolher imagem…" };
+        pick.Click += async (_, _) =>
+        {
+            var file = await Pickers.PickImageAsync();
+            if (file is null) return;
+            try
+            {
+                imagePath = await AppServices.Images.ImportLocalAsync(file, ImageKind.Screenshot);
+                UpdateImageState();
+                error.Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                error.Text = ex.Message;
+                error.Visibility = Visibility.Visible;
+            }
+        };
+        var clear = new Button { Content = "Remover" };
+        clear.Click += (_, _) => { imagePath = null; UpdateImageState(); };
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            RequestedTheme = ActualTheme,
+            Title = m.Id == 0 ? "Nova memória" : "Editar memória",
+            PrimaryButtonText = "Salvar",
+            CloseButtonText = "Cancelar",
+            DefaultButton = ContentDialogButton.Primary,
+            Content = new ScrollViewer
+            {
+                MaxHeight = 560,
+                Content = new StackPanel
+                {
+                    Spacing = 12, Width = 460, Padding = new Thickness(0, 0, 16, 0),
+                    Children =
+                    {
+                        kind, title, text, date,
+                        new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { pick, clear, imageState } },
+                        error,
+                    },
+                },
+            },
+        };
+        dialog.PrimaryButtonClick += (_, args) =>
+        {
+            m.Kind = (kind.SelectedItem as ComboBoxItem)?.Tag is MemoryKind k ? k : MemoryKind.Text;
+            m.Title = string.IsNullOrWhiteSpace(title.Text) ? null : title.Text.Trim();
+            m.Text = string.IsNullOrWhiteSpace(text.Text) ? null : text.Text.Trim();
+            m.HappenedAt = Fmt.ToIsoDate(date.Date);
+            m.ImagePath = imagePath;
+            try
+            {
+                if (m.Id == 0) AppServices.Memories.Add(m);
+                else AppServices.Memories.Update(m);
+            }
+            catch (Exception ex)
+            {
+                args.Cancel = true;
+                error.Text = ex.Message;
+                error.Visibility = Visibility.Visible;
+            }
+        };
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+    }
+}

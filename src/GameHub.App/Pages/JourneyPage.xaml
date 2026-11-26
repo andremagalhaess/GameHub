@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="GameHub.App.Pages.JourneyPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:GameHub.App.Pages"
+    xmlns:models="using:GameHub.Core.Models"
+    xmlns:controls="using:GameHub.App.Controls">
+
+    <Grid Padding="32,16,32,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Spacing="2">
+            <TextBlock Text="Minha Jornada" Style="{StaticResource GhPageTitle}" />
+            <TextBlock Text="Sua história nos games, montada só com o que você registrou: datas, sessões, notas, reviews e memórias." Style="{StaticResource GhMuted}" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <SelectorBar x:Name="Tabs" Grid.Row="1" Margin="-12,12,0,8" SelectionChanged="Tabs_SelectionChanged">
+            <SelectorBarItem Text="Painel" Tag="dash" IsSelected="True" />
+            <SelectorBarItem Text="Linha do tempo" Tag="timeline" />
+            <SelectorBarItem Text="Meu Ano Gamer" Tag="year" />
+            <SelectorBarItem Text="Calendário" Tag="calendar" />
+        </SelectorBar>
+
+        <!-- ===== Painel ===== -->
+        <ScrollViewer x:Name="DashPanel" Grid.Row="2">
+            <StackPanel Padding="0,0,0,40">
+                <Grid ColumnSpacing="12" RowSpacing="12">
+                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions><RowDefinition /><RowDefinition /></Grid.RowDefinitions>
+                    <Border Style="{StaticResource GhCard}"><StackPanel><TextBlock x:Name="DTotal" Style="{StaticResource GhStatValue}" /><TextBlock Text="Jogos cadastrados" Style="{StaticResource GhMuted}" /></StackPanel></Border>
+                    <Border Grid.Column="1" Style="{StaticResource GhCard}"><StackPanel><TextBlock x:Name="DFinished" Style="{StaticResource GhStatValue}" /><TextBlock Text="Zerados / 100%" Style="{StaticResource GhMuted}" /></StackPanel></Border>
+                    <Border Grid.Column="2" Style="{StaticResource GhCard}"><StackPanel><TextBlock x:Name="DPlaying" Style="{StaticResource GhStatValue}" /><TextBlock Text="Em andamento" Style="{StaticResource GhMuted}" /></StackPanel></Border>
+                    <Border Grid.Column="3" Style="{StaticResource GhCard}"><StackPanel><TextBlock x:Name="DAbandoned" Style="{StaticResource GhStatValue}" /><TextBlock Text="Abandonados" Style="{StaticResource GhMuted}" /></StackPanel></Border>
+                    <Border Grid.Row="1" Style="{StaticResource GhCard}"><StackPanel><TextBlock x:Name="DHours" Style="{StaticResource GhStatValue}" /><TextBlock Text="Horas jogadas" Style="{StaticResource GhMuted}" /></StackPanel></Border>
+                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource GhCard}"><StackPanel><TextBlock x:Name="DAvg" Style="{StaticResource GhStatValue}" /><TextBlock Text="Média das notas" Style="{StaticResource GhMuted}" /></StackPanel></Border>
+                    <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource GhCard}"><StackPanel><TextBlock x:Name="DGenre" Style="{StaticResource GhStatValue}" TextTrimming="CharacterEllipsis" /><TextBlock Text="Gênero favorito" Style="{StaticResource GhMuted}" /></StackPanel></Border>
+                    <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource GhCard}"><StackPanel><TextBlock x:Name="DPlatform" Style="{StaticResource GhStatValue}" TextTrimming="CharacterEllipsis" /><TextBlock Text="Plataforma mais usada" Style="{StaticResource GhMuted}" /></StackPanel></Border>
+                </Grid>
+
+                <Border x:Name="DBestCard" Style="{StaticResource GhCard}" Margin="0,12,0,0">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <controls:GameCoverCard x:Name="DBestCover" CoverWidth="60" ShowCaption="False" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="JOGO MAIS BEM AVALIADO" FontSize="12" FontWeight="SemiBold" CharacterSpacing="100" Foreground="{StaticResource GhAccentBrush}" />
+                            <HyperlinkButton x:Name="DBestTitle" Padding="0" FontSize="20" FontWeight="SemiBold" Click="DBest_Click" />
+                            <TextBlock x:Name="DBestInfo" Style="{StaticResource GhMuted}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid ColumnSpacing="12" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource GhCard}" VerticalAlignment="Stretch">
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="Jogos zerados por ano" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <controls:BarChart x:Name="ChartPerYear" Orientation="Vertical" ChartHeight="150" />
+                            <TextBlock Text="Conta jogos com status Zerado ou 100% e data de conclusão preenchida." Style="{StaticResource GhMuted}" FontSize="12" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1" Style="{StaticResource GhCard}" VerticalAlignment="Stretch">
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="Gêneros mais jogados" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <controls:BarChart x:Name="ChartGenres" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <Border Style="{StaticResource GhCard}" Margin="0,12,0,0">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Biblioteca por status" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <controls:BarChart x:Name="ChartStatus" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ===== Linha do tempo ===== -->
+        <Grid x:Name="TimelinePanel" Grid.Row="2" Visibility="Collapsed" RowSpacing="10">
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <ComboBox x:Name="PeriodBox" Header="Período" MinWidth="150" SelectionChanged="Filter_Changed">
+                    <ComboBoxItem Content="Tudo" Tag="all" IsSelected="True" />
+                    <ComboBoxItem Content="Ano" Tag="year" />
+                    <ComboBoxItem Content="Mês" Tag="month" />
+                    <ComboBoxItem Content="Personalizado" Tag="custom" />
+                </ComboBox>
+                <ComboBox x:Name="TYearBox" Header="Ano" MinWidth="100" Visibility="Collapsed" SelectionChanged="Filter_Changed" />
+                <ComboBox x:Name="TMonthBox" Header="Mês" MinWidth="130" Visibility="Collapsed" SelectionChanged="Filter_Changed" />
+                <CalendarDatePicker x:Name="TFrom" Header="De" Visibility="Collapsed" DateChanged="Date_Changed" />
+                <CalendarDatePicker x:Name="TTo" Header="Até" Visibility="Collapsed" DateChanged="Date_Changed" />
+            </StackPanel>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10">
+                <ComboBox x:Name="TStatusBox" Header="Status" MinWidth="140" SelectionChanged="Filter_Changed" />
+                <ComboBox x:Name="TGenreBox" Header="Gênero" MinWidth="150" SelectionChanged="Filter_Changed" />
+                <ComboBox x:Name="TSourceBox" Header="Plataforma" MinWidth="150" SelectionChanged="Filter_Changed" />
+                <NumberBox x:Name="TMinRating" Header="Nota mínima" Minimum="0" Maximum="10" SmallChange="0.5" SpinButtonPlacementMode="Compact" Width="120" ValueChanged="Number_Changed" />
+                <NumberBox x:Name="TMinHours" Header="Horas (mín.)" Minimum="0" SpinButtonPlacementMode="Compact" Width="120" ValueChanged="Number_Changed" />
+                <NumberBox x:Name="TMaxHours" Header="Horas (máx.)" Minimum="0" SpinButtonPlacementMode="Compact" Width="120" ValueChanged="Number_Changed" />
+                <CheckBox x:Name="TUndated" Content="Mostrar jogos sem data" IsChecked="True" VerticalAlignment="Bottom" Checked="Check_Changed" Unchecked="Check_Changed" />
+            </StackPanel>
+            <Grid Grid.Row="2">
+                <ListView x:Name="TimelineList" SelectionMode="None" IsItemClickEnabled="True"
+                          ItemClick="Timeline_ItemClick" Padding="0,0,0,32">
+                    <ListView.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate x:DataType="local:TimelineGroup">
+                                    <TextBlock Text="{x:Bind Key}" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource GhAccentBrush}" />
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListView.GroupStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="local:TimelineRow">
+                            <Grid ColumnSpacing="16" Padding="0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="96" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind DayText}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{x:Bind SourceText}" FontSize="11" Style="{StaticResource GhMuted}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <controls:GameCoverCard Grid.Column="1" Game="{x:Bind Game}" CoverWidth="54" ShowCaption="False" />
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="{x:Bind Game.Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{x:Bind Info}" Style="{StaticResource GhMuted}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{x:Bind Excerpt}" Visibility="{x:Bind ExcerptVisibility}" FontStyle="Italic" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Opacity="0.85" />
+                                </StackPanel>
+                                <Border Grid.Column="3" VerticalAlignment="Center" Background="{StaticResource GhAccentSoftBrush}" CornerRadius="10" Padding="12,4"
+                                        Visibility="{x:Bind RatingVisibility}">
+                                    <TextBlock Text="{x:Bind RatingText}" FontSize="18" FontWeight="Bold" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <TextBlock x:Name="TimelineEmpty" Visibility="Collapsed" Style="{StaticResource GhMuted}" TextWrapping="Wrap" Margin="0,20,0,0"
+                           Text="Nada para mostrar com esses filtros. A linha do tempo usa as datas de início e conclusão que você registra em Minha avaliação e as sessões medidas pelo GameHub." />
+            </Grid>
+        </Grid>
+
+        <!-- ===== Meu Ano Gamer ===== -->
+        <ScrollViewer x:Name="YearPanel" Grid.Row="2" Visibility="Collapsed">
+            <StackPanel Padding="0,0,0,40" Spacing="12">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <ComboBox x:Name="YearBox" MinWidth="120" SelectionChanged="YearBox_SelectionChanged" />
+                    <Button x:Name="ExportYearButton" Click="ExportYear_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xEE71;" FontSize="14" /><TextBlock Text="Exportar como imagem" /></StackPanel>
+                    </Button>
+                </StackPanel>
+                <InfoBar x:Name="YearInfo" IsOpen="False" />
+                <TextBlock x:Name="YearEmpty" Visibility="Collapsed" Style="{StaticResource GhMuted}" TextWrapping="Wrap"
+                           Text="Ainda não há registros neste ano. Preencha as datas de início e conclusão em Minha avaliação, ou jogue pelo GameHub para medir as sessões." />
+
+                <!-- Pôster exportável: fundo próprio e tema escuro fixo para a imagem ficar igual em qualquer tema. -->
+                <Border x:Name="YearPoster" RequestedTheme="Dark" CornerRadius="18" Padding="36" MaxWidth="1000" HorizontalAlignment="Left">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FF1A1430" Offset="0" />
+                            <GradientStop Color="#FF101624" Offset="0.6" />
+                            <GradientStop Color="#FF0B2030" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <StackPanel Spacing="22">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="MEU ANO GAMER" FontSize="13" FontWeight="SemiBold" CharacterSpacing="200" Foreground="{StaticResource GhAccentBrush}" />
+                                <TextBlock x:Name="YTitle" FontSize="54" FontWeight="Bold" Foreground="White" />
+                                <TextBlock x:Name="YPlayer" FontSize="16" Foreground="#B3FFFFFF" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.75">
+                                <Image Source="ms-appx:///Assets/Logo256.png" Width="22" Height="22" />
+                                <TextBlock Text="GameHub" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                            <Border Background="#14FFFFFF" CornerRadius="12" Padding="16"><StackPanel><TextBlock x:Name="YPlayed" Style="{StaticResource GhStatValue}" Foreground="White" /><TextBlock Text="jogos jogados" Foreground="#B3FFFFFF" /></StackPanel></Border>
+                            <Border Grid.Column="1" Background="#14FFFFFF" CornerRadius="12" Padding="16"><StackPanel><TextBlock x:Name="YStarted" Style="{StaticResource GhStatValue}" Foreground="White" /><TextBlock Text="começados" Foreground="#B3FFFFFF" /></StackPanel></Border>
+                            <Border Grid.Column="2" Background="#14FFFFFF" CornerRadius="12" Padding="16"><StackPanel><TextBlock x:Name="YFinished" Style="{StaticResource GhStatValue}" Foreground="White" /><TextBlock Text="zerados" Foreground="#B3FFFFFF" /></StackPanel></Border>
+                            <Border Grid.Column="3" Background="#14FFFFFF" CornerRadius="12" Padding="16"><StackPanel><TextBlock x:Name="YHours" Style="{StaticResource GhStatValue}" Foreground="White" /><TextBlock x:Name="YHoursLabel" Text="medidas pelo GameHub" Foreground="#B3FFFFFF" /></StackPanel></Border>
+                        </Grid>
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                            <Border Background="#14FFFFFF" CornerRadius="12" Padding="16">
+                                <Grid ColumnSpacing="14">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <controls:GameCoverCard x:Name="YBestCover" CoverWidth="70" ShowCaption="False" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Melhor jogo do ano" Foreground="#B3FFFFFF" />
+                                        <TextBlock x:Name="YBest" FontSize="20" FontWeight="SemiBold" Foreground="White" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border Grid.Column="1" Background="#14FFFFFF" CornerRadius="12" Padding="16">
+                                <Grid ColumnSpacing="14">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <controls:GameCoverCard x:Name="YWorstCover" CoverWidth="70" ShowCaption="False" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Pior jogo do ano" Foreground="#B3FFFFFF" />
+                                        <TextBlock x:Name="YWorst" FontSize="20" FontWeight="SemiBold" Foreground="White" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                            <Border Background="#14FFFFFF" CornerRadius="12" Padding="16"><StackPanel><TextBlock Text="Gênero mais jogado" Foreground="#B3FFFFFF" /><TextBlock x:Name="YGenre" FontSize="20" FontWeight="SemiBold" Foreground="White" /></StackPanel></Border>
+                            <Border Grid.Column="1" Background="#14FFFFFF" CornerRadius="12" Padding="16"><StackPanel><TextBlock Text="Plataforma mais usada" Foreground="#B3FFFFFF" /><TextBlock x:Name="YPlatform" FontSize="20" FontWeight="SemiBold" Foreground="White" /></StackPanel></Border>
+                        </Grid>
+
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Zerados por mês" FontWeight="SemiBold" Foreground="White" />
+                            <controls:BarChart x:Name="YChart" Orientation="Vertical" ChartHeight="110" EmptyText="Nenhum jogo zerado com data neste ano." />
+                        </StackPanel>
+
+                        <StackPanel x:Name="YFinishedSection" Spacing="10">
+                            <TextBlock Text="Jogos zerados" FontWeight="SemiBold" Foreground="White" />
+                            <ItemsControl x:Name="YFinishedList">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><controls:WrapPanel HorizontalSpacing="10" VerticalSpacing="10" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:Game">
+                                        <controls:GameCoverCard Game="{x:Bind}" CoverWidth="92" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <StackPanel x:Name="YFavSection" Spacing="10">
+                            <TextBlock Text="Favoritos do ano" FontWeight="SemiBold" Foreground="White" />
+                            <ItemsControl x:Name="YFavList">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><controls:WrapPanel HorizontalSpacing="10" VerticalSpacing="10" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:Game">
+                                        <controls:GameCoverCard Game="{x:Bind}" CoverWidth="92" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <StackPanel x:Name="YReviewsSection" Spacing="10">
+                            <TextBlock Text="Reviews escritas no ano" FontWeight="SemiBold" Foreground="White" />
+                            <StackPanel x:Name="YReviews" Spacing="10" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ===== Calendário ===== -->
+        <ScrollViewer x:Name="CalendarPanel" Grid.Row="2" Visibility="Collapsed">
+            <StackPanel Padding="0,0,0,40" Spacing="12" MaxWidth="1100" HorizontalAlignment="Left">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Click="PrevMonth_Click" ToolTipService.ToolTip="Mês anterior"><FontIcon Glyph="&#xE76B;" FontSize="14" /></Button>
+                        <Button Click="NextMonth_Click" ToolTipService.ToolTip="Próximo mês"><FontIcon Glyph="&#xE76C;" FontSize="14" /></Button>
+                        <TextBlock x:Name="MonthTitle" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0" />
+                    </StackPanel>
+                    <Button HorizontalAlignment="Right" Content="Hoje" Click="Today_Click" />
+                </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="6"><Ellipse Width="10" Height="10" Fill="#FF4CC38A" /><TextBlock Text="Comecei" FontSize="12" /></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6"><Ellipse Width="10" Height="10" Fill="#FFFFB547" /><TextBlock Text="Terminei" FontSize="12" /></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6"><Ellipse Width="10" Height="10" Fill="{StaticResource GhAccentBrush}" /><TextBlock Text="Joguei (sessão medida)" FontSize="12" /></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6"><Ellipse Width="10" Height="10" Fill="#FF3FB6E8" /><TextBlock Text="Memória" FontSize="12" /></StackPanel>
+                </StackPanel>
+                <Grid x:Name="CalendarGrid" ColumnSpacing="6" RowSpacing="6" />
+                <TextBlock x:Name="DayTitle" Style="{StaticResource GhSectionTitle}" />
+                <StackPanel x:Name="DayEvents" Spacing="8" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

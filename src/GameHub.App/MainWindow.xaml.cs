@@ -16,6 +16,8 @@ public sealed partial class MainWindow : Window
         ["home"] = typeof(HomePage),
         ["library"] = typeof(LibraryPage),
         ["add"] = typeof(AddGamePage),
+        ["journey"] = typeof(JourneyPage),
+        ["rankings"] = typeof(RankingsPage),
         ["profile"] = typeof(ProfilePage),
         ["settings"] = typeof(SettingsPage),
     };

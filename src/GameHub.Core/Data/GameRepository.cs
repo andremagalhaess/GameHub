@@ -258,6 +258,28 @@ public sealed class GameRepository
         return list;
     }
 
+    /// <summary>Todas as sessões medidas entre duas datas (inclusive), de todos os jogos.</summary>
+    public List<PlaySession> SessionsBetween(DateTimeOffset from, DateTimeOffset to)
+    {
+        using var c = _db.Open();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT * FROM play_sessions WHERE started_at >= @f AND started_at < @t ORDER BY started_at;";
+        cmd.Add("@f", from.ToUniversalTime().ToDb());
+        cmd.Add("@t", to.ToUniversalTime().ToDb());
+        using var r = cmd.ExecuteReader();
+        var list = new List<PlaySession>();
+        while (r.Read())
+            list.Add(new PlaySession
+            {
+                Id = r.GetInt64(r.GetOrdinal("id")),
+                GameId = r.GetInt64(r.GetOrdinal("game_id")),
+                StartedAt = r.Date("started_at")!.Value,
+                EndedAt = r.Date("ended_at")!.Value,
+                Minutes = r.GetInt64(r.GetOrdinal("minutes")),
+            });
+        return list;
+    }
+
     /// <summary>Calcula estatísticas a partir dos dados reais do banco.</summary>
     public LibraryStats Stats()
     {

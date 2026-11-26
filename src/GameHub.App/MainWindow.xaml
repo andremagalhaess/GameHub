@@ -40,6 +40,12 @@
                 <NavigationViewItem Content="Adicionar jogo" Tag="add">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE710;" Foreground="{StaticResource GhAccentBrush}" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Minha Jornada" Tag="journey">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE81C;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Meus Rankings" Tag="rankings">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE8CB;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Meu Perfil" Tag="profile">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE77B;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>

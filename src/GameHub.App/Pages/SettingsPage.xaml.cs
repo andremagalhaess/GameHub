@@ -204,7 +204,8 @@ public sealed partial class SettingsPage : Page
         var profile = AppServices.Profiles.Get();
         var used = AppServices.Games.All()
             .SelectMany(g => new[] { g.CoverPath, g.BackgroundPath, g.LogoPath, g.IconPath })
-            .Append(profile.AvatarPath).Append(profile.BannerPath);
+            .Append(profile.AvatarPath).Append(profile.BannerPath)
+            .Concat(AppServices.Memories.All().Select(m => m.ImagePath)); // screenshots das memórias nunca são apagadas
         var freed = AppServices.Images.RemoveUnused(used);
         CacheSizeText.Text = $"Imagens em cache: {AppServices.Images.SizeBytes() / 1024.0 / 1024.0:0.0} MB";
         ShowInfo(InfoBarSeverity.Success, $"{freed / 1024.0 / 1024.0:0.0} MB liberados.");

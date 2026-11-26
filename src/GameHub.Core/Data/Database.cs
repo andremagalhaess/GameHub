@@ -188,5 +188,46 @@ public sealed class Database
             updated_at  TEXT NOT NULL
         );
         """,
+
+        // v3 — Prioridade 3: memórias e rankings
+        """
+        CREATE TABLE memories (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            game_id     INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+            kind        INTEGER NOT NULL DEFAULT 0,
+            title       TEXT,
+            text        TEXT,
+            image_path  TEXT,
+            happened_at TEXT,
+            created_at  TEXT NOT NULL
+        );
+        CREATE INDEX ix_memories_game ON memories(game_id);
+
+        CREATE TABLE rankings (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            name        TEXT NOT NULL,
+            description TEXT,
+            year        INTEGER,
+            max_items   INTEGER,
+            is_builtin  INTEGER NOT NULL DEFAULT 0,
+            sort_order  INTEGER NOT NULL DEFAULT 0,
+            created_at  TEXT NOT NULL
+        );
+        CREATE TABLE ranking_items (
+            ranking_id  INTEGER NOT NULL REFERENCES rankings(id) ON DELETE CASCADE,
+            game_id     INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+            position    INTEGER NOT NULL,
+            note        TEXT,
+            PRIMARY KEY (ranking_id, game_id)
+        );
+        INSERT INTO rankings (name, description, max_items, is_builtin, sort_order, created_at) VALUES
+            ('Top 10 jogos favoritos', 'Os dez jogos que mais amo.', 10, 1, 1, '2026-01-01T00:00:00+00:00'),
+            ('Melhores jogos de todos os tempos', NULL, NULL, 1, 2, '2026-01-01T00:00:00+00:00'),
+            ('Melhores jogos do ano', 'Escolha o ano na tela de rankings.', NULL, 1, 3, '2026-01-01T00:00:00+00:00'),
+            ('Melhores histórias', NULL, NULL, 1, 4, '2026-01-01T00:00:00+00:00'),
+            ('Melhores trilhas sonoras', NULL, NULL, 1, 5, '2026-01-01T00:00:00+00:00'),
+            ('Melhores experiências multiplayer', NULL, NULL, 1, 6, '2026-01-01T00:00:00+00:00'),
+            ('Jogos mais marcantes', NULL, NULL, 1, 7, '2026-01-01T00:00:00+00:00');
+        """,
     };
 }

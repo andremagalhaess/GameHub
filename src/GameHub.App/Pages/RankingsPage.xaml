@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="GameHub.App.Pages.RankingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:GameHub.App.Pages"
+    xmlns:models="using:GameHub.Core.Models"
+    xmlns:controls="using:GameHub.App.Controls">
+
+    <Grid Padding="32,16,32,0" ColumnSpacing="24">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="290" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.ColumnSpan="2" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Text="Meus Rankings" Style="{StaticResource GhPageTitle}" />
+            <TextBlock Text="Monte suas listas e arraste os jogos para mudar a ordem." Style="{StaticResource GhMuted}" />
+        </StackPanel>
+
+        <!-- Lista de rankings -->
+        <Grid Grid.Row="1" RowSpacing="10" Margin="0,0,0,24">
+            <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+            <ListView x:Name="RankingList" SelectionMode="Single" SelectionChanged="RankingList_SelectionChanged">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="local:RankingListItem">
+                        <StackPanel Padding="0,8" Spacing="2">
+                            <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{x:Bind Info}" Style="{StaticResource GhMuted}" FontSize="12" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Button Grid.Row="1" HorizontalAlignment="Stretch" Click="NewRanking_Click">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE710;" FontSize="14" />
+                    <TextBlock Text="Novo ranking" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Ranking selecionado -->
+        <Grid Grid.Row="1" Grid.Column="1" RowSpacing="12">
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <StackPanel Spacing="2">
+                    <TextBlock x:Name="RTitle" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="Wrap" />
+                    <TextBlock x:Name="RDescription" Style="{StaticResource GhMuted}" TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                    <Button x:Name="ExportButton" Click="Export_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xEE71;" FontSize="14" /><TextBlock Text="Exportar imagem" /></StackPanel>
+                    </Button>
+                    <Button Click="Edit_Click" ToolTipService.ToolTip="Editar ranking"><FontIcon Glyph="&#xE70F;" FontSize="14" /></Button>
+                    <Button x:Name="DeleteButton" Click="Delete_Click" ToolTipService.ToolTip="Apagar ranking"><FontIcon Glyph="&#xE74D;" FontSize="14" /></Button>
+                </StackPanel>
+            </Grid>
+            <AutoSuggestBox x:Name="AddBox" Grid.Row="1" PlaceholderText="Adicionar jogo da biblioteca…" QueryIcon="Add" MaxWidth="520" HorizontalAlignment="Left" Width="520"
+                            TextChanged="AddBox_TextChanged" SuggestionChosen="AddBox_SuggestionChosen" QuerySubmitted="AddBox_QuerySubmitted" DisplayMemberPath="Title" TextMemberPath="Title" />
+            <InfoBar x:Name="Info" Grid.Row="2" IsOpen="False" />
+            <Grid Grid.Row="3">
+                <ListView x:Name="EntryList" SelectionMode="None" CanReorderItems="True" CanDragItems="True" AllowDrop="True"
+                          DragItemsCompleted="EntryList_DragItemsCompleted" IsItemClickEnabled="True" ItemClick="EntryList_ItemClick" Padding="0,0,0,32">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="local:RankingRow">
+                            <Grid ColumnSpacing="16" Padding="0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20" /><ColumnDefinition Width="48" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon Glyph="&#xE76F;" FontSize="14" Opacity="0.45" ToolTipService.ToolTip="Arraste para reordenar" />
+                                <TextBlock Grid.Column="1" Text="{x:Bind PositionText}" FontSize="26" FontWeight="Bold" Foreground="{StaticResource GhAccentBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                <controls:GameCoverCard Grid.Column="2" Game="{x:Bind Game}" CoverWidth="48" ShowCaption="False" />
+                                <StackPanel Grid.Column="3" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="{x:Bind Game.Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{x:Bind Info}" Style="{StaticResource GhMuted}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                    <Button Tag="{x:Bind Game.Id}" Click="Up_Click" ToolTipService.ToolTip="Subir" Padding="8"><FontIcon Glyph="&#xE70E;" FontSize="12" /></Button>
+                                    <Button Tag="{x:Bind Game.Id}" Click="Down_Click" ToolTipService.ToolTip="Descer" Padding="8"><FontIcon Glyph="&#xE70D;" FontSize="12" /></Button>
+                                    <Button Tag="{x:Bind Game.Id}" Click="Remove_Click" ToolTipService.ToolTip="Tirar do ranking" Padding="8"><FontIcon Glyph="&#xE711;" FontSize="12" /></Button>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <TextBlock x:Name="EmptyText" Visibility="Collapsed" Style="{StaticResource GhMuted}" TextWrapping="Wrap" Margin="0,12,0,0"
+                           Text="Este ranking está vazio. Use a busca acima para adicionar jogos da sua biblioteca." />
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>
