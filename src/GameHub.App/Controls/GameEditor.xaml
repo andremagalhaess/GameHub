@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="GameHub.App.Controls.GameEditor"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:GameHub.App.Controls"
+    xmlns:helpers="using:GameHub.App.Helpers">
+
+    <StackPanel Spacing="22">
+        <!-- Informações -->
+        <Border Style="{StaticResource GhCard}" Padding="20">
+            <StackPanel Spacing="14">
+                <TextBlock Text="Informações" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <Grid ColumnSpacing="16" RowSpacing="14">
+                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBox x:Name="TitleBox" Header="Nome *" />
+                    <TextBox x:Name="AltNamesBox" Grid.Column="1" Header="Nomes alternativos" />
+                    <TextBox x:Name="DeveloperBox" Grid.Row="1" Header="Desenvolvedora" />
+                    <TextBox x:Name="PublisherBox" Grid.Row="1" Grid.Column="1" Header="Publicadora" />
+                    <TextBox x:Name="GenresBox" Grid.Row="2" Header="Gêneros (separados por vírgula)" />
+                    <TextBox x:Name="TagsBox" Grid.Row="2" Grid.Column="1" Header="Tags (separadas por vírgula)" />
+                    <TextBox x:Name="PlatformsBox" Grid.Row="3" Header="Plataformas (separadas por vírgula)" />
+                    <TextBox x:Name="ReleaseBox" Grid.Row="3" Grid.Column="1" Header="Data de lançamento" PlaceholderText="AAAA-MM-DD ou AAAA" />
+                    <TextBox x:Name="AgeRatingBox" Grid.Row="4" Header="Classificação indicativa" />
+                    <TextBox x:Name="WebsiteBox" Grid.Row="4" Grid.Column="1" Header="Site oficial" PlaceholderText="https://" />
+                    <TextBox x:Name="TrailerBox" Grid.Row="5" Header="Trailer (link)" PlaceholderText="https://" />
+                    <TextBox x:Name="PlatformSourceBox" Grid.Row="5" Grid.Column="1" Header="Loja / launcher de origem" PlaceholderText="Manual, Steam, Epic…" />
+                </Grid>
+                <TextBox x:Name="ShortDescBox" Header="Descrição resumida" TextWrapping="Wrap" AcceptsReturn="True" MaxHeight="90" />
+                <TextBox x:Name="DescriptionBox" Header="Descrição completa" TextWrapping="Wrap" AcceptsReturn="True" Height="160" ScrollViewer.VerticalScrollBarVisibility="Auto" />
+            </StackPanel>
+        </Border>
+
+        <!-- Minha relação com o jogo -->
+        <Border Style="{StaticResource GhCard}" Padding="20">
+            <StackPanel Spacing="14">
+                <TextBlock Text="Meu progresso" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <ComboBox x:Name="StatusBox" Header="Status" MinWidth="180" />
+                    <NumberBox x:Name="HoursBox" Header="Horas jogadas" Minimum="0" Maximum="100000" SmallChange="1" LargeChange="10"
+                               SpinButtonPlacementMode="Compact" MinWidth="160" />
+                    <CheckBox x:Name="FavoriteBox" Content="Favorito" VerticalAlignment="Bottom" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Execução -->
+        <Border Style="{StaticResource GhCard}" Padding="20">
+            <StackPanel Spacing="14">
+                <TextBlock Text="Execução" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock Style="{StaticResource GhMuted}" TextWrapping="Wrap"
+                           Text="O jogo só é iniciado quando você clicar em JOGAR. Nada é executado durante o cadastro." />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <TextBox x:Name="ExeBox" Header="Executável (.exe)" />
+                    <Button Grid.Column="1" Content="Procurar…" VerticalAlignment="Bottom" Click="BrowseExe_Click" />
+                </Grid>
+                <TextBox x:Name="ArgsBox" Header="Argumentos de inicialização" PlaceholderText="ex.: -windowed -dx12" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <TextBox x:Name="WorkDirBox" Header="Pasta de trabalho (opcional)" PlaceholderText="Padrão: pasta do executável" />
+                    <Button Grid.Column="1" Content="Procurar…" VerticalAlignment="Bottom" Click="BrowseWorkDir_Click" />
+                </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Border Width="40" Height="40" CornerRadius="6" Background="{ThemeResource GhPlaceholderBrush}">
+                        <Image x:Name="IconPreview" />
+                    </Border>
+                    <Button Content="Escolher outro ícone…" Click="PickIcon_Click" VerticalAlignment="Center" />
+                    <Button Content="Usar ícone do executável" Click="ExeIcon_Click" VerticalAlignment="Center" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Artes -->
+        <Border Style="{StaticResource GhCard}" Padding="20">
+            <StackPanel Spacing="18">
+                <StackPanel>
+                    <TextBlock Text="Artes" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock Style="{StaticResource GhMuted}" TextWrapping="Wrap"
+                               Text="Escolha sua arte favorita. Só as imagens selecionadas são baixadas e guardadas no computador (funcionam offline)." />
+                </StackPanel>
+            <StackPanel Spacing="6">
+                <Grid>
+                    <TextBlock Text="Capa" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
+                    <Button Content="Escolher do computador…" HorizontalAlignment="Right" Tag="Cover" Click="PickLocalImage_Click" />
+                </Grid>
+                <GridView x:Name="CoverGallery" SelectionMode="Single" MaxHeight="420">
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="local:ImageChoice">
+                            <Grid Width="120" Height="180" CornerRadius="8" Background="{ThemeResource GhPlaceholderBrush}">
+                                <TextBlock Text="{x:Bind Label}" Visibility="{x:Bind helpers:Fmt.IfNoText(Source)}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource GhMuted}" />
+                                <Image Source="{x:Bind helpers:ImageHelper.Gallery(Source)}" Stretch="{x:Bind Stretch}" ImageFailed="Thumb_ImageFailed" />
+                                <Border Visibility="{x:Bind helpers:Fmt.IfText(Source)}" Background="{ThemeResource GhGlassBrush}" CornerRadius="4" Padding="6,2" Margin="6"
+                                        HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                    <TextBlock Text="{x:Bind Label}" FontSize="11" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+            </StackPanel>
+            <StackPanel Spacing="6">
+                <Grid>
+                    <TextBlock Text="Background (imagem de fundo)" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
+                    <Button Content="Escolher do computador…" HorizontalAlignment="Right" Tag="Background" Click="PickLocalImage_Click" />
+                </Grid>
+                <GridView x:Name="BackgroundGallery" SelectionMode="Single" MaxHeight="330">
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="local:ImageChoice">
+                            <Grid Width="240" Height="135" CornerRadius="8" Background="{ThemeResource GhPlaceholderBrush}">
+                                <TextBlock Text="{x:Bind Label}" Visibility="{x:Bind helpers:Fmt.IfNoText(Source)}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource GhMuted}" />
+                                <Image Source="{x:Bind helpers:ImageHelper.Gallery(Source)}" Stretch="{x:Bind Stretch}" ImageFailed="Thumb_ImageFailed" />
+                                <Border Visibility="{x:Bind helpers:Fmt.IfText(Source)}" Background="{ThemeResource GhGlassBrush}" CornerRadius="4" Padding="6,2" Margin="6"
+                                        HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                    <TextBlock Text="{x:Bind Label}" FontSize="11" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+            </StackPanel>
+            <StackPanel Spacing="6">
+                <Grid>
+                    <TextBlock Text="Logo" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
+                    <Button Content="Escolher do computador…" HorizontalAlignment="Right" Tag="Logo" Click="PickLocalImage_Click" />
+                </Grid>
+                <GridView x:Name="LogoGallery" SelectionMode="Single" MaxHeight="280">
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="local:ImageChoice">
+                            <Grid Width="220" Height="110" CornerRadius="8" Background="{ThemeResource GhPlaceholderBrush}">
+                                <TextBlock Text="{x:Bind Label}" Visibility="{x:Bind helpers:Fmt.IfNoText(Source)}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource GhMuted}" />
+                                <Image Source="{x:Bind helpers:ImageHelper.Gallery(Source)}" Stretch="{x:Bind Stretch}" ImageFailed="Thumb_ImageFailed" />
+                                <Border Visibility="{x:Bind helpers:Fmt.IfText(Source)}" Background="{ThemeResource GhGlassBrush}" CornerRadius="4" Padding="6,2" Margin="6"
+                                        HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                    <TextBlock Text="{x:Bind Label}" FontSize="11" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+            </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <TextBlock x:Name="ErrorText" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" Visibility="Collapsed" />
+    </StackPanel>
+</UserControl>

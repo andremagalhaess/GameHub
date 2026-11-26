@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Cor de destaque do GameHub. A cor é trocada em tempo de execução (Perfil/Configurações). -->
+    <SolidColorBrush x:Key="GhAccentBrush" Color="#7C5CFF" />
+    <SolidColorBrush x:Key="GhAccentSoftBrush" Color="#7C5CFF" Opacity="0.18" />
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="GhCardBrush" Color="#FFFFFF" Opacity="0.05" />
+            <SolidColorBrush x:Key="GhCardHoverBrush" Color="#FFFFFF" Opacity="0.09" />
+            <SolidColorBrush x:Key="GhCardBorderBrush" Color="#FFFFFF" Opacity="0.08" />
+            <SolidColorBrush x:Key="GhGlassBrush" Color="#14141C" Opacity="0.72" />
+            <SolidColorBrush x:Key="GhMutedTextBrush" Color="#FFFFFF" Opacity="0.62" />
+            <SolidColorBrush x:Key="GhPlaceholderBrush" Color="#262633" />
+            <Color x:Key="GhPageFadeColor">#FF101016</Color>
+            <Color x:Key="GhPageFadeTransparent">#00101016</Color>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GhCardBrush" Color="#000000" Opacity="0.035" />
+            <SolidColorBrush x:Key="GhCardHoverBrush" Color="#000000" Opacity="0.07" />
+            <SolidColorBrush x:Key="GhCardBorderBrush" Color="#000000" Opacity="0.08" />
+            <SolidColorBrush x:Key="GhGlassBrush" Color="#FFFFFF" Opacity="0.78" />
+            <SolidColorBrush x:Key="GhMutedTextBrush" Color="#000000" Opacity="0.6" />
+            <SolidColorBrush x:Key="GhPlaceholderBrush" Color="#E4E4EC" />
+            <Color x:Key="GhPageFadeColor">#FFF3F3F6</Color>
+            <Color x:Key="GhPageFadeTransparent">#00F3F3F6</Color>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <CornerRadius x:Key="GhCardRadius">12</CornerRadius>
+    <CornerRadius x:Key="GhCoverRadius">10</CornerRadius>
+
+    <Style x:Key="GhPageTitle" TargetType="TextBlock" BasedOn="{StaticResource TitleTextBlockStyle}">
+        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="GhSectionTitle" TargetType="TextBlock" BasedOn="{StaticResource SubtitleTextBlockStyle}">
+        <Setter Property="Margin" Value="0,24,0,10" />
+    </Style>
+
+    <Style x:Key="GhMuted" TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+        <Setter Property="Foreground" Value="{ThemeResource GhMutedTextBrush}" />
+    </Style>
+
+    <Style x:Key="GhCard" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource GhCardBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource GhCardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource GhCardRadius}" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+
+    <!-- Botão principal (JOGAR / CONFIRMAR) com a cor de destaque. -->
+    <Style x:Key="GhPrimaryButton" TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}">
+        <Setter Property="Background" Value="{StaticResource GhAccentBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource GhAccentBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="22,10" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <Style x:Key="GhPlayButton" TargetType="Button" BasedOn="{StaticResource GhPrimaryButton}">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Padding" Value="34,12" />
+        <Setter Property="MinWidth" Value="170" />
+    </Style>
+
+    <Style x:Key="GhStatValue" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+        <Style x:Key="GhShelf" TargetType="ListView">
+            <Setter Property="SelectionMode" Value="None" />
+            <Setter Property="IsItemClickEnabled" Value="True" />
+            <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Enabled" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+            <Setter Property="ScrollViewer.VerticalScrollMode" Value="Disabled" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <ItemsStackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="MinWidth" Value="0" />
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    
+</ResourceDictionary>

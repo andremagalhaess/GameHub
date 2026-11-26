@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="GameHub.App.Pages.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:GameHub.Core.Models"
+    xmlns:controls="using:GameHub.App.Controls">
+
+
+    <ScrollViewer>
+        <StackPanel Padding="32,16,32,40">
+
+            <!-- Saudação -->
+            <Grid ColumnSpacing="18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <PersonPicture x:Name="Avatar" Width="64" Height="64" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="GreetingText" Style="{StaticResource GhPageTitle}" />
+                    <TextBlock x:Name="SummaryText" Style="{StaticResource GhMuted}" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Continuar jogando -->
+            <Grid x:Name="ContinueCard" Height="280" Margin="0,24,0,0" CornerRadius="16" Visibility="Collapsed"
+                  Background="{ThemeResource GhPlaceholderBrush}">
+                <Image x:Name="ContinueBackground" Stretch="UniformToFill" VerticalAlignment="Center" />
+                <Rectangle>
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#E6000000" Offset="0" />
+                            <GradientStop Color="#66000000" Offset="0.55" />
+                            <GradientStop Color="#00000000" Offset="1" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+                <StackPanel VerticalAlignment="Bottom" Padding="32" Spacing="6" RequestedTheme="Dark">
+                    <TextBlock Text="CONTINUAR JOGANDO" FontSize="12" FontWeight="SemiBold" CharacterSpacing="120" Opacity="0.75" />
+                    <TextBlock x:Name="ContinueTitle" FontSize="34" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="ContinueInfo" Opacity="0.8" />
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,12,0,0">
+                        <Button x:Name="ContinuePlay" Style="{StaticResource GhPlayButton}" Click="ContinuePlay_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="&#xE768;" FontSize="16" />
+                                <TextBlock Text="JOGAR" />
+                            </StackPanel>
+                        </Button>
+                        <Button Content="Detalhes" Click="ContinueDetails_Click" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <InfoBar x:Name="LaunchInfo" IsOpen="False" Margin="0,12,0,0" />
+
+            <!-- Estatísticas -->
+            <TextBlock Text="Suas estatísticas" Style="{StaticResource GhSectionTitle}" />
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition /><ColumnDefinition /><ColumnDefinition /><ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource GhCard}">
+                    <StackPanel><TextBlock x:Name="StatTotal" Style="{StaticResource GhStatValue}" /><TextBlock Text="Jogos na biblioteca" Style="{StaticResource GhMuted}" /></StackPanel>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource GhCard}">
+                    <StackPanel><TextBlock x:Name="StatHours" Style="{StaticResource GhStatValue}" /><TextBlock Text="Horas jogadas" Style="{StaticResource GhMuted}" /></StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource GhCard}">
+                    <StackPanel><TextBlock x:Name="StatFinished" Style="{StaticResource GhStatValue}" /><TextBlock Text="Zerados / 100%" Style="{StaticResource GhMuted}" /></StackPanel>
+                </Border>
+                <Border Grid.Column="3" Style="{StaticResource GhCard}">
+                    <StackPanel><TextBlock x:Name="StatPlaying" Style="{StaticResource GhStatValue}" /><TextBlock Text="Em andamento" Style="{StaticResource GhMuted}" /></StackPanel>
+                </Border>
+            </Grid>
+
+                <StackPanel x:Name="PlayingSection" Visibility="Collapsed">
+                    <TextBlock Text="Em andamento" Style="{StaticResource GhSectionTitle}" />
+                    <ListView x:Name="PlayingList" Style="{StaticResource GhShelf}" ItemClick="Shelf_ItemClick">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Game">
+                                <controls:GameCoverCard Game="{x:Bind}" CoverWidth="140" Margin="0,0,14,0" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+                <StackPanel x:Name="FavoritesSection" Visibility="Collapsed">
+                    <TextBlock Text="Favoritos" Style="{StaticResource GhSectionTitle}" />
+                    <ListView x:Name="FavoritesList" Style="{StaticResource GhShelf}" ItemClick="Shelf_ItemClick">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Game">
+                                <controls:GameCoverCard Game="{x:Bind}" CoverWidth="140" Margin="0,0,14,0" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+                <StackPanel x:Name="RecentSection" Visibility="Collapsed">
+                    <TextBlock Text="Adicionados recentemente" Style="{StaticResource GhSectionTitle}" />
+                    <ListView x:Name="RecentList" Style="{StaticResource GhShelf}" ItemClick="Shelf_ItemClick">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Game">
+                                <controls:GameCoverCard Game="{x:Bind}" CoverWidth="140" Margin="0,0,14,0" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+                <StackPanel x:Name="BeatenSection" Visibility="Collapsed">
+                    <TextBlock Text="Zerados recentemente" Style="{StaticResource GhSectionTitle}" />
+                    <ListView x:Name="BeatenList" Style="{StaticResource GhShelf}" ItemClick="Shelf_ItemClick">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Game">
+                                <controls:GameCoverCard Game="{x:Bind}" CoverWidth="140" Margin="0,0,14,0" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+
+            <!-- Biblioteca vazia -->
+            <Border x:Name="EmptyCard" Style="{StaticResource GhCard}" Margin="0,24,0,0" Padding="28" Visibility="Collapsed">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Comece sua biblioteca" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock Style="{StaticResource GhMuted}" TextWrapping="Wrap"
+                               Text="Adicione qualquer jogo instalado escolhendo o arquivo .exe. O GameHub sugere o nome, busca capa e informações online e cria o botão JOGAR." />
+                    <Button Content="ADICIONAR JOGO" Style="{StaticResource GhPrimaryButton}" Click="Add_Click" Margin="0,6,0,0" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

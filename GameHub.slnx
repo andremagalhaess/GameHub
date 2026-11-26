@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GameHub.App/GameHub.App.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/GameHub.Core/GameHub.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GameHub.Core.Tests/GameHub.Core.Tests.csproj" />
+  </Folder>
+</Solution>
