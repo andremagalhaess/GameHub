@@ -37,7 +37,24 @@ O workflow `.github/workflows/build.yml` roda os testes e compila o app em `wind
 
 ## Instalador
 
-Previsto para a entrega final (Prioridade 4): MSIX assinado ou instalador Inno Setup a partir da pasta portátil. Os dados do usuário ficam em `%LOCALAPPDATA%\GameHub` e não são tocados por atualizações.
+O instalador é gerado com o [Inno Setup 6](https://jrsoftware.org/isinfo.php) a partir da pasta portátil (script em `installer\GameHub.iss`):
+
+```powershell
+winget install JRSoftware.InnoSetup                                     # uma vez
+powershell -ExecutionPolicy Bypass -File scripts\publish.ps1 -Installer
+```
+
+Resultado: `publish\GameHub-Setup-<versão>-x64.exe`. O CI também gera esse arquivo (artefato **GameHub-Setup-x64** na página da execução, em *Actions*).
+
+O que o instalador faz:
+
+- Instala só para o seu usuário (`%LOCALAPPDATA%\Programs\GameHub`), sem pedir administrador.
+- Cria atalho no Menu Iniciar e, se você marcar, na Área de Trabalho.
+- **Não** adiciona inicialização com o Windows, bandeja ou serviços.
+- Aparece em *Configurações › Aplicativos* para desinstalar. A desinstalação **não apaga** seus dados em `%LOCALAPPDATA%\GameHub`. Para apagar tudo, remova essa pasta manualmente.
+- Para atualizar, rode o instalador da nova versão por cima. Os dados são mantidos e o banco é migrado automaticamente.
+
+Por que Inno Setup e não MSIX: o MSIX exige assinar o pacote com um certificado confiável. Sem certificado comprado, o Windows bloqueia a instalação ou pede para instalar o certificado à mão. O Inno Setup gera um `.exe` comum. Como ele não é assinado, o SmartScreen pode mostrar "O Windows protegeu o computador" na primeira vez: clique em *Mais informações › Executar assim mesmo*.
 
 ## Problemas conhecidos
 

@@ -2,7 +2,7 @@
 
 Todas as chaves são informadas em **Configurações › Busca de informações online** e guardadas cifradas com o DPAPI do Windows (escopo do usuário). Um backup restaurado em outro PC ou outra conta do Windows não consegue ler as chaves: basta informá-las de novo.
 
-## Já implementadas (Prioridade 1)
+## Busca de informações
 
 ### Steam Store (sem chave)
 
@@ -30,7 +30,7 @@ O IGDB pertence à Twitch e usa autenticação de aplicativo.
 
 O GameHub obtém e renova o token de acesso sozinho (fluxo *client credentials*) e o mantém só na memória. Limite do IGDB: 4 requisições por segundo.
 
-## Plataformas (Prioridade 2)
+## Plataformas
 
 Em **Biblioteca › Atualizar biblioteca**. Nada roda sozinho em segundo plano.
 
@@ -53,7 +53,49 @@ Em **Biblioteca › Atualizar biblioteca**. Nada roda sozinho em segundo plano.
 4. Cole chave e SteamID em Configurações › Plataformas e launchers.
 
 Associação: se o mesmo jogo aparece em várias lojas (ou você já tinha adicionado pelo EXE), o GameHub junta tudo em uma entrada pelo executável ou pelo nome normalizado. Na página do jogo, *Plataformas vinculadas* mostra cada loja e permite desvincular.
-| TheGamesDB | Avaliar | Exige chave solicitada no fórum do projeto. |
-| Wikidata | Avaliar | Sem chave (SPARQL público). |
-| HowLongToBeat | Prioridade 4 | **Não há API oficial.** Só será integrado se existir um meio permitido; caso contrário, campo manual. |
-| Backloggd | Prioridade 4 | **Não há API oficial.** Importação/exportação por CSV, sem sincronização simulada. |
+
+## Outras fontes avaliadas (não implementadas)
+
+| Fonte | Situação |
+|---|---|
+| TheGamesDB | Exige chave solicitada no fórum do projeto. Pode ser adicionada como novo `IMetadataProvider`. |
+| Wikidata | Sem chave (SPARQL público). Dados de capa e descrição mais pobres que Steam/IGDB. |
+
+## HowLongToBeat
+
+O HowLongToBeat **não tem API pública** e os termos de uso do site não autorizam coleta automática. Por isso o GameHub não consulta o site sozinho:
+
+- Na página de cada jogo, o card **Quanto tempo leva** mostra as estimativas (história principal, com extras e complecionista) que você informou.
+- O link **HowLongToBeat** abre a busca do jogo no site, no seu navegador.
+- Em **Editar**, a seção *Duração estimada* recebe as horas.
+- As estimativas também entram na exportação e importação CSV de jogos.
+
+## Backloggd
+
+O Backloggd **não tem API pública** nem sincronização oficial. O GameHub não finge sincronizar. O que existe:
+
+- **Importar CSV do Backloggd** (Configurações › Importar e exportar): reconhece colunas em inglês como `Game`, `Platform`, `Status`, `Rating`, `Review`, `Started`, `Finished`, `Wishlist`, `Backlog` e `Playing`.
+  - Notas de 0,5 a 5 estrelas viram 1 a 10.
+  - Status: Completed vira Zerado; Mastered vira 100%; Shelved vira Pausado; Abandoned vira Abandonado; Retired vira Zerado. Played não muda o status.
+  - Jogos da wishlist são ignorados.
+  - Jogos que já existem no GameHub (mesmo nome) são atualizados, não duplicados.
+- **Exportar avaliações e histórico**: gera um CSV com colunas em inglês e nota em estrelas, para usar no Backloggd ou em outra ferramenta.
+- Na página de cada jogo, o link **Backloggd** abre a busca do jogo no site.
+
+> Suposição: os nomes de coluna do CSV do Backloggd podem mudar. O importador aceita vários nomes (pt e en) para cada campo. Se algum arquivo não for reconhecido, renomeie o cabeçalho para `Game`, `Status`, `Rating` etc.
+
+## Importar e exportar (CSV)
+
+Em **Configurações › Importar e exportar**:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `GameHub-jogos.csv` | Nome, status, favorito, nota, minutos (GameHub e plataforma), datas, origem, plataformas, gêneros, tags, desenvolvedora, publicadora, lançamento, executável, argumentos, pasta, URI do launcher, estimativas HLTB |
+| `GameHub-reviews.csv` | Review, pontos positivos e negativos, momentos, comentários, nota e status |
+| `GameHub-jornada.csv` | Uma linha por evento: início, conclusão, sessão medida e memória |
+| `GameHub-rankings.csv` | Ranking, descrição, ano, limite, posição e jogo |
+
+- Os arquivos usam `;` e UTF-8, que o Excel em português abre direto em colunas. Na importação, `;`, `,` e tabulação são detectados sozinhos.
+- Importe primeiro os **jogos**: reviews, jornada e rankings procuram os jogos pelo nome.
+- Importar o mesmo arquivo duas vezes não duplica sessões, memórias nem rankings.
+- Caminhos de executável são guardados como texto. **Nada é executado** na importação.

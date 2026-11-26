@@ -2,7 +2,7 @@
 
 Launcher universal de jogos e diário gamer pessoal para **Windows 11**. Nativo (C# / .NET 10 + WinUI 3), leve, com banco de dados local SQLite e sem conta online.
 
-> Estado atual: **Prioridades 1, 2 e 3 concluídas**. A prioridade 4 está listada em [Roadmap](#roadmap).
+> Versão **1.0.0**: prioridades 1 a 4 da especificação concluídas.
 
 ## O que já funciona
 
@@ -23,12 +23,21 @@ Launcher universal de jogos e diário gamer pessoal para **Windows 11**. Nativo 
 | **Minha Jornada** | Painel com cards (cadastrados, zerados, em andamento, abandonados, horas, média das notas, gênero favorito, plataforma mais usada, jogo mais bem avaliado) e gráficos de zerados por ano, gêneros e status. **Linha do tempo** agrupada por ano, com filtros por ano, mês ou período personalizado, status, gênero, plataforma, nota e horas. **Meu Ano Gamer**: retrospectiva do ano (jogados, começados, zerados, horas medidas, melhor e pior jogo, gênero e plataforma, zerados por mês, favoritos, reviews) com **exportação em PNG**. **Calendário** mensal com inícios, conclusões, sessões e memórias de cada dia. |
 | **Memórias** | Na página de cada jogo: screenshots, imagens, textos, momentos favoritos, cenas marcantes e observações, com data opcional. As imagens são copiadas para a pasta do GameHub (o original não é alterado). |
 | **Meus Rankings** | 7 rankings iniciais (Top 10 favoritos, melhores de todos os tempos, do ano, histórias, trilhas sonoras, multiplayer, mais marcantes) e rankings próprios. Arrastar e soltar (ou botões subir/descer) para reordenar, limite opcional, **exportação em PNG**. |
+| **Importar e exportar** | CSV de jogos, reviews, jornada e rankings (abre no Excel). Importação sem duplicar, com relatório de linhas com problema. |
+| **Backloggd** | Importa o CSV exportado do Backloggd (estrelas viram nota 0–10, status mapeados) e exporta avaliações e histórico em formato compatível. Sem sincronização falsa: o Backloggd não tem API pública. |
+| **HowLongToBeat** | Card *Quanto tempo leva* na página do jogo, com as estimativas que você informa e link direto para o site (que não tem API pública). |
 | **Configurações** | Tema, transparência, animações, tamanho das capas, cor; chaves RAWG/IGDB (cifradas com DPAPI); cache de imagens; **backup e restauração** completos (.zip). |
 
 ## Requisitos
 
 - Windows 11 (funciona também no Windows 10 19041+), x64 ou ARM64.
 - Para compilar: [.NET SDK 10](https://dotnet.microsoft.com/download/dotnet/10.0). Visual Studio 2022/2026 com a carga *Desenvolvimento para desktop com .NET* + *WinUI* é opcional (útil para depurar).
+
+## Instalar
+
+Baixe o `GameHub-Setup-<versão>-x64.exe` (artefato **GameHub-Setup-x64** do último build em *Actions*, ou gere com `scripts\publish.ps1 -Installer`) e execute. Ele instala só para o seu usuário, sem administrador, e cria o atalho no Menu Iniciar. Como o instalador não é assinado, o SmartScreen pode pedir *Mais informações › Executar assim mesmo*.
+
+Prefere sem instalar? Use a pasta portátil (artefato **GameHub-win-x64**) e abra `GameHub.exe`.
 
 ## Compilar e executar
 
@@ -81,6 +90,6 @@ docs/                documentação
 
 Arquitetura e decisões em [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 
-## Roadmap
+## Testes
 
-- **Prioridade 4**: HowLongToBeat, Backloggd (CSV), importação/exportação, instalador, otimizações.
+`dotnet test tests\GameHub.Core.Tests` roda 80 testes automatizados. Eles cobrem a adição por EXE (sem executar), a identificação de nomes, a busca online com respostas simuladas, a escolha de resultados, o cache de imagens, a execução e medição de sessões e a importação das plataformas. Também cobrem duplicados, perfil, avaliações, Minha Jornada, rankings, backup e restauração, o funcionamento offline, a importação e exportação CSV e o desempenho com 3.000 a 5.000 jogos.
