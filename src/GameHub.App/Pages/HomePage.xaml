@@ -4,7 +4,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:models="using:GameHub.Core.Models"
-    xmlns:controls="using:GameHub.App.Controls">
+    xmlns:controls="using:GameHub.App.Controls"
+    xmlns:helpers="using:GameHub.App.Helpers">
 
 
     <ScrollViewer>
@@ -114,6 +115,23 @@
                         </ListView.ItemTemplate>
                     </ListView>
                 </StackPanel>
+
+            <StackPanel x:Name="ReviewsSection" Visibility="Collapsed">
+                <TextBlock Text="Últimas avaliações" Style="{StaticResource GhSectionTitle}" />
+                <ListView x:Name="ReviewsList" Style="{StaticResource GhShelf}" ItemClick="Shelf_ItemClick">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Game">
+                            <Grid Margin="0,0,14,0">
+                                <controls:GameCoverCard Game="{x:Bind}" CoverWidth="140" />
+                                <Border Background="{StaticResource GhAccentBrush}" CornerRadius="8" Padding="8,2" Margin="8"
+                                        HorizontalAlignment="Right" VerticalAlignment="Top">
+                                    <TextBlock Text="{x:Bind helpers:Fmt.Rating(PersonalRating)}" Foreground="White" FontWeight="Bold" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
 
             <!-- Biblioteca vazia -->
             <Border x:Name="EmptyCard" Style="{StaticResource GhCard}" Margin="0,24,0,0" Padding="28" Visibility="Collapsed">

@@ -32,7 +32,7 @@ public sealed partial class HomePage : Page
         Avatar.ProfilePicture = ImageHelper.Local(profile.AvatarPath, 128);
         SummaryText.Text = stats.TotalGames == 0
             ? "Sua biblioteca ainda está vazia."
-            : $"{stats.TotalGames} jogos · {Fmt.Hours(stats.TotalPlaytimeMinutes)} jogadas pelo GameHub";
+            : $"{stats.TotalGames} jogos · {Fmt.Hours(stats.TotalPlaytimeMinutes)} jogadas" + (stats.AverageRating is { } avg ? $" · nota média {avg.ToString("0.0", Fmt.PtBr)}" : "");
 
         StatTotal.Text = stats.TotalGames.ToString();
         StatHours.Text = Fmt.Hours(stats.TotalPlaytimeMinutes);
@@ -46,9 +46,9 @@ public sealed partial class HomePage : Page
         {
             ContinueCard.Visibility = Visibility.Visible;
             ContinueTitle.Text = _continue.Title;
-            ContinueInfo.Text = $"Última vez: {Fmt.When(_continue.LastPlayedAt)} · {Fmt.Hours(_continue.PlaytimeMinutes)} jogadas";
+            ContinueInfo.Text = $"Última vez: {Fmt.When(_continue.LastPlayedAt)} · {Fmt.Hours(_continue.TotalPlaytimeMinutes)} jogadas";
             ContinueBackground.Source = ImageHelper.Local(_continue.BackgroundPath ?? _continue.CoverPath, 1600);
-            ContinuePlay.IsEnabled = !string.IsNullOrWhiteSpace(_continue.ExecutablePath);
+            ContinuePlay.IsEnabled = _continue.CanLaunch;
         }
         else ContinueCard.Visibility = Visibility.Collapsed;
 
@@ -59,6 +59,7 @@ public sealed partial class HomePage : Page
             .Concat(games.Query(new GameQuery(Status: GameStatus.Completed100)))
             .OrderByDescending(g => g.UpdatedAt).Take(20).ToList();
         Fill(BeatenSection, BeatenList, beaten);
+        Fill(ReviewsSection, ReviewsList, AppServices.Reviews.Latest(games, 12).Select(x => x.Game).ToList());
 
         EmptyCard.Visibility = stats.TotalGames == 0 ? Visibility.Visible : Visibility.Collapsed;
     }

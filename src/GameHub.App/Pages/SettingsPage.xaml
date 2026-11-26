@@ -94,6 +94,42 @@
                 </StackPanel>
             </Border>
 
+            <!-- Plataformas -->
+            <TextBlock Text="Plataformas e launchers" Style="{StaticResource GhSectionTitle}" />
+            <TextBlock Style="{StaticResource GhMuted}" TextWrapping="Wrap"
+                       Text="Em Biblioteca › Atualizar biblioteca, o GameHub procura jogos instalados lendo arquivos e registros locais de cada launcher. Nenhuma senha é pedida ou guardada. Escolha onde procurar:" />
+            <Border Style="{StaticResource GhCard}">
+                <StackPanel x:Name="ScannersPanel" Spacing="4" />
+            </Border>
+            <Border Style="{StaticResource GhCard}">
+                <StackPanel Spacing="10">
+                    <Grid>
+                        <TextBlock Text="Steam: biblioteca completa e horas jogadas" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock x:Name="SteamApiState" HorizontalAlignment="Right" />
+                    </Grid>
+                    <TextBlock Style="{StaticResource GhMuted}" FontSize="12" TextWrapping="Wrap"
+                               Text="Opcional. Com a chave da Steam Web API e o seu SteamID64, o GameHub importa também os jogos não instalados e as horas registradas pela Steam (dado oficial). Seu perfil precisa ter &quot;Detalhes de jogos&quot; público." />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PasswordBox x:Name="SteamKeyBox" PlaceholderText="Chave da Steam Web API" Width="300" />
+                        <TextBox x:Name="SteamIdBox" PlaceholderText="SteamID64 (ex.: 7656119…)" Width="230" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Salvar" Click="SaveSteamApi_Click" />
+                        <Button Content="Remover" Click="RemoveSteamApi_Click" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <HyperlinkButton Content="Obter chave da Steam Web API" NavigateUri="https://steamcommunity.com/dev/apikey" Padding="0" />
+                        <HyperlinkButton Content="Descobrir meu SteamID64" NavigateUri="https://steamcommunity.com/my/edit/info" Padding="0" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource GhCard}">
+                <StackPanel Spacing="8">
+                    <TextBlock x:Name="IgnoredText" />
+                    <Button Content="Permitir reimportar jogos removidos" Click="ClearIgnored_Click" />
+                </StackPanel>
+            </Border>
+
             <!-- Armazenamento -->
             <TextBlock Text="Dados e armazenamento" Style="{StaticResource GhSectionTitle}" />
             <Border Style="{StaticResource GhCard}">

@@ -25,6 +25,15 @@ public static class Fmt
             : iso;
     }
 
+    /// <summary>"yyyy-MM-dd" → "10/02/2024".</summary>
+    public static string? ShortDate(string? iso) =>
+        DateTime.TryParseExact(iso, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d.ToString("dd/MM/yyyy", PtBr) : null;
+
+    public static DateTimeOffset? ToDateTimeOffset(string? iso) =>
+        DateTime.TryParseExact(iso, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? new DateTimeOffset(d) : null;
+
+    public static string? ToIsoDate(DateTimeOffset? d) => d?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
     public static string Year(Game g) => g.ReleaseYear?.ToString() ?? "";
 
     public static string When(DateTimeOffset? d)
@@ -40,6 +49,8 @@ public static class Fmt
             _ => local.ToString("d 'de' MMM 'de' yyyy", PtBr),
         };
     }
+
+    public static string Rating(double? r) => r is { } v ? v.ToString("0.#", PtBr) : "—";
 
     public static string Status(GameStatus s) => s.ToDisplay();
     public static Visibility StatusBadge(GameStatus s) => s == GameStatus.None ? Visibility.Collapsed : Visibility.Visible;

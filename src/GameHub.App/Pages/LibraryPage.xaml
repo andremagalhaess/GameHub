@@ -18,15 +18,26 @@
                 <TextBlock Text="Biblioteca" Style="{StaticResource GhPageTitle}" />
                 <TextBlock x:Name="CountText" Style="{StaticResource GhMuted}" />
             </StackPanel>
-            <Button HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource GhPrimaryButton}" Click="Add_Click">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Glyph="&#xE710;" FontSize="14" />
-                    <TextBlock Text="ADICIONAR JOGO" />
-                </StackPanel>
-            </Button>
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <ProgressRing x:Name="ImportBusy" IsActive="False" Width="20" Height="20" />
+                <Button x:Name="ImportButton" Click="Import_Click" ToolTipService.ToolTip="Procura jogos instalados nas plataformas (Steam, Epic, GOG, Ubisoft, EA, Battle.net, Riot, Xbox…)">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                        <TextBlock Text="Atualizar biblioteca" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource GhPrimaryButton}" Click="Add_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE710;" FontSize="14" />
+                        <TextBlock Text="ADICIONAR JOGO" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,18,0,14">
+        <StackPanel Grid.Row="1" Spacing="10" Margin="0,18,0,14">
+        <InfoBar x:Name="ImportInfo" IsOpen="False" IsClosable="True" />
+        <StackPanel Orientation="Horizontal" Spacing="10">
             <AutoSuggestBox x:Name="SearchBox" PlaceholderText="Buscar por nome, gênero ou desenvolvedora" Width="340"
                             QueryIcon="Find" TextChanged="SearchBox_TextChanged" />
             <ComboBox x:Name="StatusFilter" Width="170" SelectionChanged="Selection_Changed" />
@@ -36,6 +47,7 @@
                 <ComboBoxItem Content="Jogados recentemente" Tag="RecentlyPlayed" />
                 <ComboBoxItem Content="Mais horas" Tag="Playtime" />
                 <ComboBoxItem Content="Lançamento" Tag="ReleaseDate" />
+                <ComboBoxItem Content="Minha nota" Tag="Rating" />
             </ComboBox>
             <ToggleButton x:Name="FavToggle" Click="Fav_Click" ToolTipService.ToolTip="Só favoritos">
                 <StackPanel Orientation="Horizontal" Spacing="6">
@@ -43,6 +55,27 @@
                     <TextBlock Text="Favoritos" />
                 </StackPanel>
             </ToggleButton>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="10">
+            <ComboBox x:Name="GenreFilter" Width="200" SelectionChanged="Selection_Changed" />
+            <ComboBox x:Name="SourceFilter" Width="210" SelectionChanged="Selection_Changed" />
+            <ComboBox x:Name="RatingFilter" Width="160" SelectionChanged="Selection_Changed">
+                <ComboBoxItem Content="Qualquer nota" />
+                <ComboBoxItem Content="Nota 9 ou mais" Tag="9" />
+                <ComboBoxItem Content="Nota 8 ou mais" Tag="8" />
+                <ComboBoxItem Content="Nota 7 ou mais" Tag="7" />
+                <ComboBoxItem Content="Nota 5 ou mais" Tag="5" />
+            </ComboBox>
+            <ComboBox x:Name="TimeFilter" Width="180" SelectionChanged="Selection_Changed">
+                <ComboBoxItem Content="Qualquer tempo" />
+                <ComboBoxItem Content="Nunca jogado" Tag="0-0" />
+                <ComboBoxItem Content="Até 5 h" Tag="1-300" />
+                <ComboBoxItem Content="5 a 20 h" Tag="300-1200" />
+                <ComboBoxItem Content="20 a 50 h" Tag="1200-3000" />
+                <ComboBoxItem Content="Mais de 50 h" Tag="3000-" />
+            </ComboBox>
+            <Button Content="Limpar filtros" Click="ClearFilters_Click" />
+        </StackPanel>
         </StackPanel>
 
         <GridView x:Name="GamesGrid" Grid.Row="2" IsItemClickEnabled="True" SelectionMode="None" ItemClick="Grid_ItemClick"

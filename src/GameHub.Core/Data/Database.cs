@@ -144,5 +144,49 @@ public sealed class Database
             value TEXT
         );
         """,
+
+        // v2 — Prioridade 2: plataformas, avaliações e reviews
+        """
+        ALTER TABLE games ADD COLUMN launch_uri TEXT;
+        ALTER TABLE games ADD COLUMN started_at TEXT;
+        ALTER TABLE games ADD COLUMN finished_at TEXT;
+        ALTER TABLE games ADD COLUMN platform_playtime_minutes INTEGER NOT NULL DEFAULT 0;
+        CREATE INDEX ix_games_source ON games(source, source_id);
+
+        -- Um jogo pode existir em várias lojas/launchers (associação a uma única entrada).
+        CREATE TABLE game_sources (
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            game_id          INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+            source           TEXT NOT NULL,
+            source_id        TEXT NOT NULL,
+            install_dir      TEXT,
+            executable_path  TEXT,
+            launch_uri       TEXT,
+            playtime_minutes INTEGER,
+            last_played_at   TEXT,
+            is_installed     INTEGER NOT NULL DEFAULT 1,
+            detected_at      TEXT NOT NULL,
+            UNIQUE (source, source_id)
+        );
+        CREATE INDEX ix_game_sources_game ON game_sources(game_id);
+
+        -- Fontes que o usuário removeu da biblioteca: não reimportar automaticamente.
+        CREATE TABLE ignored_sources (
+            source    TEXT NOT NULL,
+            source_id TEXT NOT NULL,
+            PRIMARY KEY (source, source_id)
+        );
+
+        CREATE TABLE reviews (
+            game_id     INTEGER PRIMARY KEY REFERENCES games(id) ON DELETE CASCADE,
+            review      TEXT,
+            pros        TEXT,
+            cons        TEXT,
+            comments    TEXT,
+            moments     TEXT,
+            created_at  TEXT NOT NULL,
+            updated_at  TEXT NOT NULL
+        );
+        """,
     };
 }

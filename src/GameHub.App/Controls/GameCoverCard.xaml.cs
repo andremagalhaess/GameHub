@@ -44,7 +44,7 @@ public sealed partial class GameCoverCard : UserControl
         Placeholder.Visibility = source is null ? Visibility.Visible : Visibility.Collapsed;
         PlaceholderText.Text = g.Title;
         TitleText.Text = g.Title;
-        SubText.Text = g.PlaytimeMinutes > 0 ? $"{Fmt.Hours(g.PlaytimeMinutes)} jogadas" : (g.ReleaseYear?.ToString() ?? g.Developer ?? "");
+        SubText.Text = g.TotalPlaytimeMinutes > 0 ? $"{Fmt.Hours(g.TotalPlaytimeMinutes)} jogadas" : (g.ReleaseYear?.ToString() ?? g.Developer ?? "");
         StatusText.Text = g.Status.ToDisplay();
         StatusBadge.Visibility = g.Status == GameStatus.None ? Visibility.Collapsed : Visibility.Visible;
         FavIcon.Visibility = g.IsFavorite ? Visibility.Visible : Visibility.Collapsed;

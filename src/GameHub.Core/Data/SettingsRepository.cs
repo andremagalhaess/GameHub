@@ -54,4 +54,9 @@ public static class SettingKeys
     public const string IgdbClientSecret = "secret.igdb.client_secret";
     public const string SteamEnabled = "metadata.steam.enabled";
     public const string MetadataLanguage = "metadata.language"; // "pt-BR"
+    public const string SteamWebApiKey = "secret.steam.web_api_key";
+    public const string SteamId = "steam.steamid64";
+    /// <summary>Prefixo: "platform.enabled.{nome}" = "1"/"0".</summary>
+    public const string PlatformEnabledPrefix = "platform.enabled.";
+    public const string LastImportAt = "platform.last_import_at";
 }

@@ -15,6 +15,36 @@ public sealed class PlayerProfile
     public bool IsCreated => !string.IsNullOrWhiteSpace(DisplayName);
 }
 
+/// <summary>Review completa de um jogo (a nota fica em <see cref="Game.PersonalRating"/>).</summary>
+public sealed class GameReview
+{
+    public long GameId { get; set; }
+    public string? Review { get; set; }
+    public string? Pros { get; set; }
+    public string? Cons { get; set; }
+    public string? Comments { get; set; }
+    public string? Moments { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+
+    public bool IsEmpty => new[] { Review, Pros, Cons, Comments, Moments }.All(string.IsNullOrWhiteSpace);
+}
+
+/// <summary>Um vínculo do jogo com uma loja/launcher.</summary>
+public sealed class GameSourceLink
+{
+    public long Id { get; set; }
+    public long GameId { get; set; }
+    public string Source { get; set; } = "";
+    public string SourceId { get; set; } = "";
+    public string? InstallDir { get; set; }
+    public string? ExecutablePath { get; set; }
+    public string? LaunchUri { get; set; }
+    public long? PlaytimeMinutes { get; set; }
+    public DateTimeOffset? LastPlayedAt { get; set; }
+    public bool IsInstalled { get; set; }
+}
+
 public sealed class PlaySession
 {
     public long Id { get; set; }

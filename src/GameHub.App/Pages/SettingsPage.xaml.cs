@@ -29,6 +29,7 @@ public sealed partial class SettingsPage : Page
         AccentPicker.Color = ThemeService.ParseColor(AppServices.Profiles.Get().AccentColor);
         SteamToggle.IsOn = s.GetBool(SettingKeys.SteamEnabled, true);
         RefreshKeyStates();
+        BuildScanners();
         DataPathText.Text = $"Pasta de dados: {AppServices.Paths.Root}";
         CacheSizeText.Text = $"Imagens em cache: {AppServices.Images.SizeBytes() / 1024.0 / 1024.0:0.0} MB";
         VersionText.Text = $"GameHub {typeof(App).Assembly.GetName().Version?.ToString(3)} · banco de dados v{AppServices.Db.SchemaVersion}";
@@ -44,6 +45,58 @@ public sealed partial class SettingsPage : Page
         IgdbId.Text = secrets.Get(SettingKeys.IgdbClientId) ?? "";
         RawgKey.Password = "";
         IgdbSecret.Password = "";
+        SteamApiState.Text = secrets.Has(SettingKeys.SteamWebApiKey) && !string.IsNullOrWhiteSpace(AppServices.Settings.Get(SettingKeys.SteamId))
+            ? "Configurada ✓" : "Não configurada";
+        SteamIdBox.Text = AppServices.Settings.Get(SettingKeys.SteamId) ?? "";
+        SteamKeyBox.Password = "";
+        IgnoredText.Text = $"Jogos removidos que não voltam na importação: {AppServices.Sources.IgnoredCount()}";
+    }
+
+    private void BuildScanners()
+    {
+        ScannersPanel.Children.Clear();
+        foreach (var scanner in AppServices.Importer.Scanners)
+        {
+            if (scanner is GameHub.Core.Platforms.SteamWebApiScanner) continue; // configurada abaixo
+            var name = AppServices.ScannerName(scanner);
+            var label = scanner is GameHub.Core.Platforms.UninstallRegistryScanner ? "EA app, Battle.net, Riot, Rockstar e Amazon Games" : name;
+            var toggle = new ToggleSwitch { Header = label, IsOn = AppServices.IsScannerEnabled(scanner), OnContent = "Procurar", OffContent = "Ignorar" };
+            toggle.Toggled += (_, _) => AppServices.Settings.SetBool(SettingKeys.PlatformEnabledPrefix + name, toggle.IsOn);
+            ScannersPanel.Children.Add(toggle);
+        }
+    }
+
+    private void SaveSteamApi_Click(object sender, RoutedEventArgs e)
+    {
+        var id = SteamIdBox.Text.Trim();
+        if (id.Length != 17 || !id.All(char.IsDigit) || !id.StartsWith("7656"))
+        {
+            ShowInfo(InfoBarSeverity.Warning, "O SteamID64 tem 17 dígitos e começa com 7656. Ele aparece na URL do seu perfil ou em sites como steamid.io.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(SteamKeyBox.Password) && !AppServices.Secrets.Has(SettingKeys.SteamWebApiKey))
+        {
+            ShowInfo(InfoBarSeverity.Warning, "Cole a chave da Steam Web API.");
+            return;
+        }
+        if (!string.IsNullOrWhiteSpace(SteamKeyBox.Password)) AppServices.Secrets.Set(SettingKeys.SteamWebApiKey, SteamKeyBox.Password);
+        AppServices.Settings.Set(SettingKeys.SteamId, id);
+        RefreshKeyStates();
+        ShowInfo(InfoBarSeverity.Success, "Steam Web API salva. Use Biblioteca › Atualizar biblioteca para importar.");
+    }
+
+    private void RemoveSteamApi_Click(object sender, RoutedEventArgs e)
+    {
+        AppServices.Secrets.Set(SettingKeys.SteamWebApiKey, null);
+        AppServices.Settings.Set(SettingKeys.SteamId, null);
+        RefreshKeyStates();
+    }
+
+    private void ClearIgnored_Click(object sender, RoutedEventArgs e)
+    {
+        AppServices.Sources.ClearIgnored();
+        RefreshKeyStates();
+        ShowInfo(InfoBarSeverity.Success, "Pronto. Na próxima atualização da biblioteca, os jogos removidos podem voltar.");
     }
 
     // ---------- Aparência ----------

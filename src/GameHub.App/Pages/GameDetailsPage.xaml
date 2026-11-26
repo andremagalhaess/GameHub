@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:GameHub.App.Controls">
 
+    <Grid>
     <ScrollViewer>
         <Grid>
             <!-- Fundo em destaque -->
@@ -100,17 +101,106 @@
                             </Grid>
                         </Border>
 
+                        <!-- Minha avaliação -->
+                        <Border Style="{StaticResource GhCard}" Padding="20">
+                            <StackPanel Spacing="14">
+                                <Grid>
+                                    <TextBlock Text="Minha avaliação" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                    <Button x:Name="ReviewButton" HorizontalAlignment="Right" Click="Review_Click" Style="{StaticResource GhPrimaryButton}" Padding="16,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE734;" FontSize="14" />
+                                            <TextBlock x:Name="ReviewButtonText" Text="Registrar avaliação" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="18">
+                                    <Border Background="{StaticResource GhAccentSoftBrush}" CornerRadius="12" Padding="18,6" MinWidth="96">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <TextBlock x:Name="MyRatingText" FontSize="38" FontWeight="Bold" HorizontalAlignment="Center" />
+                                            <TextBlock Text="de 10" FontSize="12" Opacity="0.7" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center" Spacing="4">
+                                        <TextBlock x:Name="MyStatusText" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="MyDatesText" Style="{StaticResource GhMuted}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <TextBlock x:Name="ReviewText" TextWrapping="Wrap" IsTextSelectionEnabled="True" LineHeight="22" />
+                                <Grid x:Name="ProsConsGrid" ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="👍 Pontos positivos" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="ProsText" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="4">
+                                        <TextBlock Text="👎 Pontos negativos" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="ConsText" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+                                    </StackPanel>
+                                </Grid>
+                                <StackPanel x:Name="MomentsPanel" Spacing="4">
+                                    <TextBlock Text="✨ Momentos memoráveis" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="MomentsText" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+                                </StackPanel>
+                                <StackPanel x:Name="CommentsPanel" Spacing="4">
+                                    <TextBlock Text="Comentários" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="CommentsText" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
                         <StackPanel Spacing="8">
                             <TextBlock Text="Sobre o jogo" Style="{StaticResource SubtitleTextBlockStyle}" />
                             <TextBlock x:Name="DescriptionText" TextWrapping="Wrap" IsTextSelectionEnabled="True" LineHeight="22" />
                         </StackPanel>
                     </StackPanel>
 
-                    <Border Grid.Column="1" Style="{StaticResource GhCard}" VerticalAlignment="Top">
-                        <StackPanel x:Name="FactsPanel" Spacing="12" />
-                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="16" VerticalAlignment="Top">
+                        <Border Style="{StaticResource GhCard}">
+                            <StackPanel x:Name="FactsPanel" Spacing="12" />
+                        </Border>
+                        <Border x:Name="PlatformsCard" Style="{StaticResource GhCard}" Visibility="Collapsed">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Plataformas vinculadas" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                <StackPanel x:Name="PlatformsPanel" Spacing="8" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
                 </Grid>
             </StackPanel>
         </Grid>
     </ScrollViewer>
+
+    <!-- Registro de avaliação -->
+    <ContentDialog x:Name="ReviewDialog" Title="Minha avaliação" PrimaryButtonText="Salvar" CloseButtonText="Cancelar"
+                   DefaultButton="Primary" PrimaryButtonClick="ReviewDialog_PrimaryButtonClick">
+        <ScrollViewer MaxHeight="600">
+            <StackPanel Spacing="14" Width="520" Padding="0,0,16,0">
+                <StackPanel Spacing="4">
+                    <Grid>
+                        <TextBlock Text="Nota (0 a 10)" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <CheckBox x:Name="NoRatingBox" Content="Sem nota" HorizontalAlignment="Right" Checked="NoRating_Changed" Unchecked="NoRating_Changed" />
+                    </Grid>
+                    <Grid ColumnSpacing="14">
+                        <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="72" /></Grid.ColumnDefinitions>
+                        <Slider x:Name="RatingSlider" Minimum="0" Maximum="10" StepFrequency="0.5" SmallChange="0.5" LargeChange="1"
+                                TickFrequency="1" TickPlacement="Outside" ValueChanged="RatingSlider_ValueChanged" />
+                        <TextBlock x:Name="RatingValue" Grid.Column="1" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"
+                                   Foreground="{StaticResource GhAccentBrush}" />
+                    </Grid>
+                </StackPanel>
+                <ComboBox x:Name="ReviewStatus" Header="Status" MinWidth="200" />
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <CalendarDatePicker x:Name="StartedPicker" Header="Comecei em" PlaceholderText="Escolher data" />
+                    <CalendarDatePicker x:Name="FinishedPicker" Header="Terminei em" PlaceholderText="Escolher data" />
+                </StackPanel>
+                <TextBox x:Name="ReviewBox" Header="Review" TextWrapping="Wrap" AcceptsReturn="True" Height="130" PlaceholderText="O que achou do jogo?" />
+                <TextBox x:Name="ProsBox" Header="Pontos positivos" TextWrapping="Wrap" AcceptsReturn="True" Height="70" />
+                <TextBox x:Name="ConsBox" Header="Pontos negativos" TextWrapping="Wrap" AcceptsReturn="True" Height="70" />
+                <TextBox x:Name="MomentsBox" Header="Momentos memoráveis" TextWrapping="Wrap" AcceptsReturn="True" Height="70" />
+                <TextBox x:Name="CommentsBox" Header="Comentários" TextWrapping="Wrap" AcceptsReturn="True" Height="60" />
+                <TextBox x:Name="ReviewTagsBox" Header="Tags (separadas por vírgula)" />
+            </StackPanel>
+        </ScrollViewer>
+    </ContentDialog>
+    </Grid>
 </Page>

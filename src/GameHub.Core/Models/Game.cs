@@ -45,6 +45,8 @@ public sealed class Game
     public string? ExecutablePath { get; set; }
     public string? LaunchArguments { get; set; }
     public string? WorkingDirectory { get; set; }
+    /// <summary>Atalho de launcher (ex.: steam://rungameid/570). Usado quando não há executável.</summary>
+    public string? LaunchUri { get; set; }
 
     // Origem
     /// <summary>Loja/launcher de origem (ex.: "Manual", "Steam").</summary>
@@ -60,6 +62,12 @@ public sealed class Game
     public double? PersonalRating { get; set; }
     /// <summary>Minutos jogados (sessões medidas pelo GameHub + ajustes manuais).</summary>
     public long PlaytimeMinutes { get; set; }
+    /// <summary>Maior tempo informado por uma plataforma confiável (ex.: Steam Web API).</summary>
+    public long PlatformPlaytimeMinutes { get; set; }
+    /// <summary>Data em que comecei a jogar (yyyy-MM-dd), informada pelo usuário.</summary>
+    public string? StartedAt { get; set; }
+    /// <summary>Data de conclusão (yyyy-MM-dd), informada pelo usuário.</summary>
+    public string? FinishedAt { get; set; }
     public DateTimeOffset? LastPlayedAt { get; set; }
     public DateTimeOffset AddedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
@@ -67,13 +75,28 @@ public sealed class Game
     public int? ReleaseYear =>
         ReleaseDate is { Length: >= 4 } d && int.TryParse(d.AsSpan(0, 4), out var y) ? y : null;
 
-    public double PlaytimeHours => Math.Round(PlaytimeMinutes / 60.0, 1);
+    /// <summary>
+    /// Tempo exibido: o maior entre o medido/registrado no GameHub e o da plataforma
+    /// (não soma, para não contar a mesma sessão duas vezes).
+    /// </summary>
+    public long TotalPlaytimeMinutes => Math.Max(PlaytimeMinutes, PlatformPlaytimeMinutes);
+    public double PlaytimeHours => Math.Round(TotalPlaytimeMinutes / 60.0, 1);
+    public bool CanLaunch => !string.IsNullOrWhiteSpace(ExecutablePath) || !string.IsNullOrWhiteSpace(LaunchUri);
 }
 
 public static class GameSources
 {
     public const string Manual = "Manual";
     public const string Steam = "Steam";
+    public const string Epic = "Epic Games";
+    public const string Gog = "GOG";
+    public const string Ubisoft = "Ubisoft Connect";
+    public const string Ea = "EA app";
+    public const string BattleNet = "Battle.net";
+    public const string Riot = "Riot";
+    public const string Rockstar = "Rockstar";
+    public const string Amazon = "Amazon Games";
+    public const string Xbox = "Xbox / PC Game Pass";
 }
 
 public static class GameStatusText

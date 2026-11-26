@@ -39,7 +39,7 @@ public sealed partial class WelcomePage : Page
             p.Username = string.IsNullOrWhiteSpace(UserBox.Text) ? NameBox.Text.Trim().ToLowerInvariant().Replace(' ', '_') : UserBox.Text.Trim();
             p.AvatarPath = _avatarPath;
             AppServices.Profiles.Save(p);
-            App.MainWindow!.FinishWelcome();
+            App.MainWindow!.FinishWelcome(importNow: ImportBox.IsChecked == true);
         }
         catch (Exception ex) { ShowError(ex.Message); }
     }

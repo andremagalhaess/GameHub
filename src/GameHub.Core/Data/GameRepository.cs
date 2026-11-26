@@ -4,14 +4,21 @@ using Microsoft.Data.Sqlite;
 
 namespace GameHub.Core.Data;
 
-public enum GameSort { Title, RecentlyAdded, RecentlyPlayed, Playtime, ReleaseDate }
+public enum GameSort { Title, RecentlyAdded, RecentlyPlayed, Playtime, ReleaseDate, Rating }
 
 public sealed record GameQuery(
     string? Search = null,
     GameStatus? Status = null,
     bool FavoritesOnly = false,
     GameSort Sort = GameSort.Title,
-    int? Limit = null);
+    int? Limit = null,
+    string? Genre = null,
+    string? Source = null,
+    double? MinRating = null,
+    long? MinPlaytimeMinutes = null,
+    long? MaxPlaytimeMinutes = null,
+    int? ReleaseYear = null,
+    bool RatedOnly = false);
 
 /// <summary>Resultado da verificação de duplicados antes de adicionar um jogo.</summary>
 public sealed record DuplicateMatch(Game Existing, string Reason);
@@ -45,14 +52,50 @@ public sealed class GameRepository
         if (cmd.ExecuteNonQuery() == 0) throw new KeyNotFoundException($"Jogo {g.Id} não existe.");
     }
 
-    /// <summary>Remove o jogo da biblioteca. NÃO desinstala nem apaga arquivos do jogo.</summary>
+    /// <summary>
+    /// Remove o jogo da biblioteca. NÃO desinstala nem apaga arquivos do jogo.
+    /// As plataformas vinculadas entram na lista de ignorados para não voltarem na próxima importação.
+    /// </summary>
     public bool Remove(long id)
     {
         using var c = _db.Open();
+        using var tx = c.BeginTransaction();
+        using (var ign = c.CreateCommand())
+        {
+            ign.Transaction = tx;
+            ign.CommandText = """
+                INSERT OR IGNORE INTO ignored_sources (source, source_id)
+                SELECT source, source_id FROM game_sources WHERE game_id = @id;
+                """;
+            ign.Add("@id", id);
+            ign.ExecuteNonQuery();
+        }
+        int n;
+        using (var cmd = c.CreateCommand())
+        {
+            cmd.Transaction = tx;
+            cmd.CommandText = "DELETE FROM games WHERE id = @id;";
+            cmd.Add("@id", id);
+            n = cmd.ExecuteNonQuery();
+        }
+        tx.Commit();
+        return n > 0;
+    }
+
+    /// <summary>Gêneros distintos da biblioteca (para filtros).</summary>
+    public List<string> DistinctGenres() =>
+        All().SelectMany(g => g.Genres).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.CurrentCultureIgnoreCase).ToList();
+
+    /// <summary>Plataformas/lojas distintas (origem principal + vínculos).</summary>
+    public List<string> DistinctSources()
+    {
+        using var c = _db.Open();
         using var cmd = c.CreateCommand();
-        cmd.CommandText = "DELETE FROM games WHERE id = @id;";
-        cmd.Add("@id", id);
-        return cmd.ExecuteNonQuery() > 0;
+        cmd.CommandText = "SELECT source FROM games UNION SELECT source FROM game_sources ORDER BY 1;";
+        using var r = cmd.ExecuteReader();
+        var list = new List<string>();
+        while (r.Read()) list.Add(r.GetString(0));
+        return list;
     }
 
     public Game? Get(long id)
@@ -80,11 +123,27 @@ public sealed class GameRepository
         }
         if (q.Status is { } st) { where.Add("status = @st"); cmd.Add("@st", (int)st); }
         if (q.FavoritesOnly) where.Add("is_favorite = 1");
+        if (!string.IsNullOrWhiteSpace(q.Genre))
+        {
+            where.Add("('|' || genres || '|') LIKE @genre ESCAPE '\\'");
+            cmd.Add("@genre", "%|" + EscapeLike(q.Genre.Trim()) + "|%");
+        }
+        if (!string.IsNullOrWhiteSpace(q.Source))
+        {
+            where.Add("(source = @src OR EXISTS (SELECT 1 FROM game_sources gs WHERE gs.game_id = games.id AND gs.source = @src))");
+            cmd.Add("@src", q.Source);
+        }
+        if (q.MinRating is { } mr) { where.Add("personal_rating >= @mr"); cmd.Add("@mr", mr); }
+        if (q.RatedOnly) where.Add("personal_rating IS NOT NULL");
+        if (q.MinPlaytimeMinutes is { } minp) { where.Add("MAX(playtime_minutes, platform_playtime_minutes) >= @minp"); cmd.Add("@minp", minp); }
+        if (q.MaxPlaytimeMinutes is { } maxp) { where.Add("MAX(playtime_minutes, platform_playtime_minutes) <= @maxp"); cmd.Add("@maxp", maxp); }
+        if (q.ReleaseYear is { } ry) { where.Add("substr(release_date, 1, 4) = @ry"); cmd.Add("@ry", ry.ToString()); }
         var order = q.Sort switch
         {
             GameSort.RecentlyAdded => "added_at DESC",
             GameSort.RecentlyPlayed => "last_played_at IS NULL, last_played_at DESC",
-            GameSort.Playtime => "playtime_minutes DESC",
+            GameSort.Playtime => "MAX(playtime_minutes, platform_playtime_minutes) DESC",
+            GameSort.Rating => "personal_rating IS NULL, personal_rating DESC",
             GameSort.ReleaseDate => "release_date IS NULL, release_date DESC",
             _ => "normalized_title COLLATE NOCASE ASC",
         };
@@ -205,7 +264,7 @@ public sealed class GameRepository
         var games = All();
         var rated = games.Where(g => g.PersonalRating.HasValue).ToList();
         var favoriteGenre = games
-            .Where(g => g.Status is not GameStatus.None and not GameStatus.Backlog || g.PlaytimeMinutes > 0)
+            .Where(g => g.Status is not GameStatus.None and not GameStatus.Backlog || g.TotalPlaytimeMinutes > 0)
             .SelectMany(g => g.Genres)
             .GroupBy(x => x, StringComparer.OrdinalIgnoreCase)
             .OrderByDescending(gr => gr.Count()).ThenBy(gr => gr.Key)
@@ -221,7 +280,7 @@ public sealed class GameRepository
             Abandoned = games.Count(g => g.Status == GameStatus.Abandoned),
             Paused = games.Count(g => g.Status == GameStatus.Paused),
             Favorites = games.Count(g => g.IsFavorite),
-            TotalPlaytimeMinutes = games.Sum(g => g.PlaytimeMinutes),
+            TotalPlaytimeMinutes = games.Sum(g => g.TotalPlaytimeMinutes),
             RatedGames = rated.Count,
             AverageRating = rated.Count > 0 ? Math.Round(rated.Average(g => g.PersonalRating!.Value), 1) : null,
             BestRatedGame = rated.OrderByDescending(g => g.PersonalRating).ThenBy(g => g.Title).FirstOrDefault(),
@@ -240,8 +299,12 @@ public sealed class GameRepository
 
     public static string NormalizePath(string path)
     {
-        try { return Path.GetFullPath(path.Trim().Trim('"')); }
-        catch { return path.Trim(); }
+        var p = path.Trim().Trim('"');
+        // Caminho do Windows (C:\...): normaliza separadores sem depender do SO em que o código roda.
+        if (p.Length >= 3 && char.IsLetter(p[0]) && p[1] == ':' && (p[2] == '\\' || p[2] == '/'))
+            return p.Replace('/', '\\');
+        try { return Path.GetFullPath(p); }
+        catch { return p; }
     }
 
     private static string EscapeLike(string s) => s.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
@@ -253,6 +316,7 @@ public sealed class GameRepository
         "external_rating_source", "cover_path", "background_path", "logo_path", "icon_path", "executable_path",
         "launch_arguments", "working_directory", "source", "source_id", "metadata_provider", "metadata_id", "status",
         "is_favorite", "personal_rating", "playtime_minutes", "last_played_at", "added_at", "updated_at",
+        "launch_uri", "started_at", "finished_at", "platform_playtime_minutes",
     };
     private static readonly string Columns = string.Join(", ", ColumnList);
     private static readonly string Params = string.Join(", ", ColumnList.Select(c => "@" + c));
@@ -295,6 +359,10 @@ public sealed class GameRepository
         cmd.Add("@last_played_at", g.LastPlayedAt.ToDb());
         cmd.Add("@added_at", g.AddedAt.ToDb());
         cmd.Add("@updated_at", g.UpdatedAt.ToDb());
+        cmd.Add("@launch_uri", g.LaunchUri.ToDb());
+        cmd.Add("@started_at", g.StartedAt.ToDb());
+        cmd.Add("@finished_at", g.FinishedAt.ToDb());
+        cmd.Add("@platform_playtime_minutes", Math.Max(0, g.PlatformPlaytimeMinutes));
     }
 
     private static Game Read(SqliteDataReader r) => new()
@@ -333,5 +401,9 @@ public sealed class GameRepository
         LastPlayedAt = r.Date("last_played_at"),
         AddedAt = r.Date("added_at") ?? DateTimeOffset.UtcNow,
         UpdatedAt = r.Date("updated_at") ?? DateTimeOffset.UtcNow,
+        LaunchUri = r.Str("launch_uri"),
+        StartedAt = r.Str("started_at"),
+        FinishedAt = r.Str("finished_at"),
+        PlatformPlaytimeMinutes = r.Long("platform_playtime_minutes") ?? 0,
     };
 }

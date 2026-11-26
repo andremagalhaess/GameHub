@@ -60,6 +60,7 @@
                     <Button Grid.Column="1" Content="Procurar…" VerticalAlignment="Bottom" Click="BrowseExe_Click" />
                 </Grid>
                 <TextBox x:Name="ArgsBox" Header="Argumentos de inicialização" PlaceholderText="ex.: -windowed -dx12" />
+                <TextBox x:Name="LaunchUriBox" Header="Ou iniciar pelo launcher (link)" PlaceholderText="ex.: steam://rungameid/570 (tem prioridade sobre o executável)" />
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                     <TextBox x:Name="WorkDirBox" Header="Pasta de trabalho (opcional)" PlaceholderText="Padrão: pasta do executável" />

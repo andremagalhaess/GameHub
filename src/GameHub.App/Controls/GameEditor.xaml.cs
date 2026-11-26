@@ -54,6 +54,7 @@ public sealed partial class GameEditor : UserControl
         FavoriteBox.IsChecked = game.IsFavorite;
         ExeBox.Text = game.ExecutablePath ?? "";
         ArgsBox.Text = game.LaunchArguments ?? "";
+        LaunchUriBox.Text = game.LaunchUri ?? "";
         WorkDirBox.Text = game.WorkingDirectory ?? "";
         SetIcon(game.IconPath);
 
@@ -158,6 +159,8 @@ public sealed partial class GameEditor : UserControl
             if (box.Text.Trim().Length > 0 && !(Uri.TryCreate(box.Text.Trim(), UriKind.Absolute, out var u) && (u.Scheme == "https" || u.Scheme == "http")))
                 return $"O link do {label} precisa começar com https://";
         if (!double.IsNaN(HoursBox.Value) && HoursBox.Value < 0) return "Horas jogadas não pode ser negativo.";
+        if (LaunchUriBox.Text.Trim().Length > 0 && !GameHub.Core.Launching.GameLauncher.IsAllowedLaunchUri(LaunchUriBox.Text.Trim()))
+            return "Link de launcher não reconhecido. Use steam://, com.epicgames.launcher://, uplay://, goggalaxy://, battlenet://, amazon-games:// ou deixe vazio.";
         return null;
     }
 
@@ -188,6 +191,7 @@ public sealed partial class GameEditor : UserControl
         g.IsFavorite = FavoriteBox.IsChecked == true;
         g.ExecutablePath = NullIfEmpty(ExeBox.Text.Trim().Trim('"'));
         g.LaunchArguments = NullIfEmpty(ArgsBox.Text);
+        g.LaunchUri = NullIfEmpty(LaunchUriBox.Text);
         g.WorkingDirectory = NullIfEmpty(WorkDirBox.Text);
         g.IconPath = _iconPath;
 

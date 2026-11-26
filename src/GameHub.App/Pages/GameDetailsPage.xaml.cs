@@ -18,7 +18,11 @@ public sealed partial class GameDetailsPage : Page
     public GameDetailsPage()
     {
         InitializeComponent();
-        foreach (var s in GameStatusText.All) StatusBox.Items.Add(new ComboBoxItem { Content = s.ToDisplay(), Tag = s });
+        foreach (var s in GameStatusText.All)
+        {
+            StatusBox.Items.Add(new ComboBoxItem { Content = s.ToDisplay(), Tag = s });
+            ReviewStatus.Items.Add(new ComboBoxItem { Content = s.ToDisplay(), Tag = s });
+        }
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -46,14 +50,14 @@ public sealed partial class GameDetailsPage : Page
         TitleText.Visibility = LogoImage.Source is null ? Visibility.Visible : Visibility.Collapsed;
         SubtitleText.Text = string.Join("  ·  ", new[] { g.ReleaseYear?.ToString(), g.Developer, g.Genres.FirstOrDefault() }.Where(x => !string.IsNullOrWhiteSpace(x)));
 
-        PlayButton.IsEnabled = !string.IsNullOrWhiteSpace(g.ExecutablePath);
-        ToolTipService.SetToolTip(PlayButton, g.ExecutablePath ?? "Nenhum executável configurado");
+        PlayButton.IsEnabled = g.CanLaunch;
+        ToolTipService.SetToolTip(PlayButton, g.LaunchUri ?? g.ExecutablePath ?? "Nenhum executável configurado");
         FavButton.IsChecked = g.IsFavorite;
         FavIcon.Glyph = g.IsFavorite ? "" : "";
         StatusBox.SelectedIndex = GameStatusText.All.ToList().IndexOf(g.Status);
         OpenFolderItem.IsEnabled = g.ExecutablePath is not null;
 
-        HoursText.Text = Fmt.Hours(g.PlaytimeMinutes);
+        HoursText.Text = Fmt.Hours(g.TotalPlaytimeMinutes);
         LastPlayedText.Text = Fmt.When(g.LastPlayedAt);
         RatingText.Text = g.ExternalRating is { } r ? $"{r:0} / 100" : "—";
         RatingSource.Text = g.ExternalRatingSource ?? "Nota externa";
@@ -73,8 +77,124 @@ public sealed partial class GameDetailsPage : Page
         AddFact("Adicionado em", g.AddedAt.ToLocalTime().ToString("d 'de' MMMM 'de' yyyy", Fmt.PtBr));
         if (g.MetadataProvider == RawgProvider.ProviderName) AddLink("Dados fornecidos por", "https://rawg.io", "RAWG");
 
+        LoadReview(g);
+        LoadPlatforms(g);
         _loading = false;
     }
+
+    private void LoadReview(Game g)
+    {
+        var review = AppServices.Reviews.Get(g.Id);
+        MyRatingText.Text = g.PersonalRating is { } r ? r.ToString("0.#", Fmt.PtBr) : "—";
+        MyStatusText.Text = g.Status.ToDisplay();
+        var dates = new List<string>();
+        if (Fmt.ShortDate(g.StartedAt) is { } st) dates.Add($"Comecei em {st}");
+        if (Fmt.ShortDate(g.FinishedAt) is { } fi) dates.Add($"terminei em {fi}");
+        MyDatesText.Text = dates.Count > 0 ? string.Join(", ", dates) : "Datas não registradas";
+        ReviewButtonText.Text = g.PersonalRating is null && review is null ? "Registrar avaliação" : "Editar avaliação";
+        ReviewText.Text = review?.Review ?? (g.PersonalRating is null ? "Você ainda não avaliou este jogo." : "");
+        ReviewText.Visibility = string.IsNullOrEmpty(ReviewText.Text) ? Visibility.Collapsed : Visibility.Visible;
+        ProsText.Text = Fmt.Or(review?.Pros);
+        ConsText.Text = Fmt.Or(review?.Cons);
+        ProsConsGrid.Visibility = review?.Pros is null && review?.Cons is null ? Visibility.Collapsed : Visibility.Visible;
+        MomentsText.Text = review?.Moments ?? "";
+        MomentsPanel.Visibility = Fmt.IfText(review?.Moments);
+        CommentsText.Text = review?.Comments ?? "";
+        CommentsPanel.Visibility = Fmt.IfText(review?.Comments);
+    }
+
+    private void LoadPlatforms(Game g)
+    {
+        var links = AppServices.Sources.ForGame(g.Id);
+        PlatformsCard.Visibility = links.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        PlatformsPanel.Children.Clear();
+        foreach (var l in links)
+        {
+            var row = new Grid { ColumnSpacing = 8 };
+            row.ColumnDefinitions.Add(new ColumnDefinition());
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            var info = new StackPanel();
+            info.Children.Add(new TextBlock { Text = l.Source, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
+            var detail = l.IsInstalled ? "Instalado" : "Não instalado";
+            if (l.PlaytimeMinutes is > 0) detail += $" · {Fmt.Hours(l.PlaytimeMinutes.Value)} na plataforma";
+            info.Children.Add(new TextBlock { Text = detail, FontSize = 12, Opacity = 0.7 });
+            row.Children.Add(info);
+            var unlink = new Button { Content = "Desvincular", FontSize = 12, Padding = new Thickness(8, 3, 8, 3), VerticalAlignment = VerticalAlignment.Center };
+            ToolTipService.SetToolTip(unlink, "Separa esta plataforma deste jogo. Na próxima atualização da biblioteca ela vira uma entrada própria.");
+            var linkId = l.Id;
+            unlink.Click += (_, _) => { AppServices.Sources.Unlink(linkId); LoadPlatforms(g); };
+            Grid.SetColumn(unlink, 1);
+            row.Children.Add(unlink);
+            PlatformsPanel.Children.Add(row);
+        }
+    }
+
+    // ---------- Avaliação ----------
+
+    private async void Review_Click(object sender, RoutedEventArgs e)
+    {
+        if (_game is null) return;
+        var g = _game;
+        var review = AppServices.Reviews.Get(g.Id);
+        NoRatingBox.IsChecked = g.PersonalRating is null;
+        RatingSlider.Value = g.PersonalRating ?? 7;
+        UpdateRatingLabel();
+        ReviewStatus.SelectedIndex = GameStatusText.All.ToList().IndexOf(g.Status);
+        StartedPicker.Date = Fmt.ToDateTimeOffset(g.StartedAt);
+        FinishedPicker.Date = Fmt.ToDateTimeOffset(g.FinishedAt);
+        ReviewBox.Text = review?.Review ?? "";
+        ProsBox.Text = review?.Pros ?? "";
+        ConsBox.Text = review?.Cons ?? "";
+        MomentsBox.Text = review?.Moments ?? "";
+        CommentsBox.Text = review?.Comments ?? "";
+        ReviewTagsBox.Text = string.Join(", ", g.Tags);
+        ReviewDialog.Title = $"Minha avaliação · {g.Title}";
+        ReviewDialog.XamlRoot = XamlRoot;
+        ReviewDialog.RequestedTheme = ActualTheme;
+        await ReviewDialog.ShowAsync();
+    }
+
+    private void RatingSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e) => UpdateRatingLabel();
+    private void NoRating_Changed(object sender, RoutedEventArgs e) => UpdateRatingLabel();
+
+    private void UpdateRatingLabel()
+    {
+        var none = NoRatingBox.IsChecked == true;
+        RatingSlider.IsEnabled = !none;
+        RatingValue.Text = none ? "—" : RatingSlider.Value.ToString("0.#", Fmt.PtBr);
+    }
+
+    private void ReviewDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    {
+        if (_game is null) return;
+        var g = _game;
+        var started = StartedPicker.Date;
+        var finished = FinishedPicker.Date;
+        if (started is not null && finished is not null && finished < started)
+        {
+            args.Cancel = true;
+            ReviewDialog.Title = "A data de conclusão é anterior ao início";
+            return;
+        }
+        g.PersonalRating = NoRatingBox.IsChecked == true ? null : Math.Round(RatingSlider.Value * 2) / 2;
+        g.Status = (ReviewStatus.SelectedItem as ComboBoxItem)?.Tag is GameStatus st ? st : g.Status;
+        g.StartedAt = Fmt.ToIsoDate(started);
+        g.FinishedAt = Fmt.ToIsoDate(finished);
+        g.Tags = Fmt.SplitList(ReviewTagsBox.Text);
+        AppServices.Games.Update(g);
+        AppServices.Reviews.Save(new GameReview
+        {
+            GameId = g.Id,
+            Review = NullIfEmpty(ReviewBox.Text),
+            Pros = NullIfEmpty(ProsBox.Text),
+            Cons = NullIfEmpty(ConsBox.Text),
+            Moments = NullIfEmpty(MomentsBox.Text),
+            Comments = NullIfEmpty(CommentsBox.Text),
+        });
+        Load(g.Id);
+    }
+
+    private static string? NullIfEmpty(string s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
     private void AddFact(string label, string? value)
     {
@@ -100,7 +220,9 @@ public sealed partial class GameDetailsPage : Page
         switch (result.Outcome)
         {
             case LaunchOutcome.Started:
-                ShowInfo(InfoBarSeverity.Success, $"Iniciando {_game.Title}. O tempo de jogo é medido enquanto o executável estiver aberto.");
+                ShowInfo(InfoBarSeverity.Success, _game.LaunchUri is not null
+                    ? $"Abrindo {_game.Title} pelo launcher. O tempo de jogo fica com a plataforma (a Steam informa as horas via Web API)."
+                    : $"Iniciando {_game.Title}. O tempo de jogo é medido enquanto o executável estiver aberto.");
                 LastPlayedText.Text = Fmt.When(DateTimeOffset.UtcNow);
                 if (result.SessionMinutes is { } session) _ = AfterSessionAsync(_game.Id, session);
                 break;

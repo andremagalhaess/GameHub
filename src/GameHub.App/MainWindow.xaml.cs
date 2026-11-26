@@ -62,11 +62,11 @@ public sealed partial class MainWindow : Window
         ContentFrame.Navigate(typeof(WelcomePage));
     }
 
-    public void FinishWelcome()
+    public void FinishWelcome(bool importNow = false)
     {
         Nav.IsPaneVisible = true;
         ContentFrame.BackStack.Clear();
-        Navigate(typeof(HomePage));
+        Navigate(importNow ? typeof(LibraryPage) : typeof(HomePage), importNow ? LibraryPage.ImportOnOpen : null);
         ContentFrame.BackStack.Clear();
     }
 

@@ -30,12 +30,29 @@ O IGDB pertence à Twitch e usa autenticação de aplicativo.
 
 O GameHub obtém e renova o token de acesso sozinho (fluxo *client credentials*) e o mantém só na memória. Limite do IGDB: 4 requisições por segundo.
 
-## Planejadas
+## Plataformas (Prioridade 2)
 
-| Integração | Situação | O que será necessário |
-|---|---|---|
-| Biblioteca Steam (jogos que você possui) | Prioridade 2 | Detecção local (pastas `steamapps`) sem chave; para jogos não instalados, Steam Web API key + SteamID64 (perfil com "Detalhes do jogo" público). |
-| Epic, GOG, Ubisoft, EA, Battle.net, Riot, Rockstar, Amazon, Xbox/Microsoft Store | Prioridade 2 | Detecção local dos jogos instalados (manifestos/arquivos de cada launcher). A maioria não tem API pública de biblioteca; quando não houver, importação manual. Nenhuma senha será pedida. |
+Em **Biblioteca › Atualizar biblioteca**. Nada roda sozinho em segundo plano.
+
+| Plataforma | Como detecta | Como inicia | Horas |
+|---|---|---|---|
+| Steam (instalados) | `libraryfolders.vdf` + `appmanifest_*.acf` | `steam://rungameid/ID` | via Web API (abaixo) |
+| Steam (conta inteira) | Steam Web API oficial `IPlayerService/GetOwnedGames` | `steam://rungameid/ID` | **sim**, dado oficial da Steam |
+| Epic Games Store | manifestos `*.item` em `ProgramData\Epic` | protocolo `com.epicgames.launcher://` | não (a Epic não oferece API) |
+| GOG | registro `GOG.com\Games` | executável (DRM-free) | medidas pelo GameHub |
+| Ubisoft Connect | registro `Ubisoft\Launcher\Installs` | `uplay://launch/ID/0` | não |
+| EA app, Battle.net, Rockstar, Amazon | "Programas instalados" do Windows (editor da entrada) | executável registrado pelo instalador | medidas pelo GameHub quando o EXE é o próprio jogo |
+| Riot (VALORANT, LoL) | "Programas instalados" | `RiotClientServices.exe --launch-product=…` | não |
+| Xbox / PC Game Pass / Microsoft Store | pastas `XboxGames` com `MicrosoftGame.config` | executável do jogo | medidas pelo GameHub |
+
+### Steam Web API (opcional)
+
+1. Gere a chave em <https://steamcommunity.com/dev/apikey> (domínio: qualquer, ex. `localhost`).
+2. Descubra seu **SteamID64** (17 dígitos, começa com 7656): aparece na URL do perfil quando não há URL personalizada, ou em sites como steamid.io.
+3. No perfil Steam, em *Privacidade*, deixe **Detalhes de jogos** como *Público*.
+4. Cole chave e SteamID em Configurações › Plataformas e launchers.
+
+Associação: se o mesmo jogo aparece em várias lojas (ou você já tinha adicionado pelo EXE), o GameHub junta tudo em uma entrada pelo executável ou pelo nome normalizado. Na página do jogo, *Plataformas vinculadas* mostra cada loja e permite desvincular.
 | TheGamesDB | Avaliar | Exige chave solicitada no fórum do projeto. |
 | Wikidata | Avaliar | Sem chave (SPARQL público). |
 | HowLongToBeat | Prioridade 4 | **Não há API oficial.** Só será integrado se existir um meio permitido; caso contrário, campo manual. |

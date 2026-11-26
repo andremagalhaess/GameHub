@@ -20,6 +20,8 @@
                 <TextBox x:Name="NameBox" Header="Nome de exibição" PlaceholderText="Como quer ser chamado?" TextChanged="NameBox_TextChanged" />
                 <TextBox x:Name="UserBox" Header="Nome de usuário" PlaceholderText="ex.: andre" />
 
+                <CheckBox x:Name="ImportBox" IsChecked="True" Content="Procurar jogos já instalados (Steam, Epic, GOG, Ubisoft, EA, Battle.net, Riot, Xbox…)" />
+
                 <TextBlock x:Name="ErrorText" Foreground="{ThemeResource SystemFillColorCriticalBrush}" Visibility="Collapsed" TextWrapping="Wrap" />
 
                 <Button x:Name="StartButton" Content="Começar" Style="{StaticResource GhPrimaryButton}" HorizontalAlignment="Stretch" IsEnabled="False" Click="Start_Click" />

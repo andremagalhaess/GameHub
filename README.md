@@ -2,7 +2,7 @@
 
 Launcher universal de jogos e diário gamer pessoal para **Windows 11**. Nativo (C# / .NET 10 + WinUI 3), leve, com banco de dados local SQLite e sem conta online.
 
-> Estado atual: **Prioridade 1 concluída** (interface principal, banco de dados, perfil, biblioteca, adição por EXE, busca automática de informações e botão JOGAR). As prioridades 2 a 4 estão listadas em [Roadmap](#roadmap).
+> Estado atual: **Prioridades 1 e 2 concluídas**. As prioridades 3 e 4 estão listadas em [Roadmap](#roadmap).
 
 ## O que já funciona
 
@@ -17,6 +17,9 @@ Launcher universal de jogos e diário gamer pessoal para **Windows 11**. Nativo 
 | **Página do jogo** | Background e logo em destaque, **JOGAR**, favoritar, status (Backlog, Jogando, Zerado, 100%, Abandonado, Pausado), editar, atualizar informações online, alterar capa/background, abrir pasta, remover. |
 | **JOGAR** | Executa o EXE com argumentos e pasta de trabalho configuráveis. Mede o tempo de sessão sem polling (espera o processo fechar). Se o EXE fechar em menos de 1 minuto (launcher intermediário), a sessão **não** é contada. |
 | **Perfil** | Local: nome, usuário, foto, banner, bio, cor de destaque, jogo atual. Estatísticas reais da biblioteca e prateleiras de favoritos, em andamento, zerados e abandonados. |
+| **Plataformas** | *Atualizar biblioteca* detecta jogos instalados de Steam, Epic, GOG, Ubisoft Connect, EA app, Battle.net, Riot, Rockstar, Amazon Games e Xbox/PC Game Pass, lendo arquivos e registros locais (sem senha). Com a Steam Web API (opcional), importa também jogos não instalados e as horas oficiais. Um jogo presente em várias lojas vira uma única entrada; jogos removidos não voltam; desinstalados são marcados, nunca apagados. |
+| **Avaliações** | Nota de 0 a 10 (meio ponto), review, pontos positivos e negativos, momentos memoráveis, comentários, tags, datas de início e conclusão. Editável a qualquer momento. |
+| **Filtros** | Nome, status, gênero, plataforma, nota mínima, tempo jogado, favoritos; ordenação por nome, adição, último jogo, horas, lançamento e nota. |
 | **Configurações** | Tema, transparência, animações, tamanho das capas, cor; chaves RAWG/IGDB (cifradas com DPAPI); cache de imagens; **backup e restauração** completos (.zip). |
 
 ## Requisitos
@@ -77,6 +80,5 @@ Arquitetura e decisões em [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 
 ## Roadmap
 
-- **Prioridade 2**: importação Steam e demais plataformas, avaliações (0–10), reviews, filtros avançados.
 - **Prioridade 3**: Minha Jornada, estatísticas, timeline, Meu Ano Gamer, rankings, calendário, memórias.
 - **Prioridade 4**: HowLongToBeat, Backloggd (CSV), importação/exportação, instalador, otimizações.

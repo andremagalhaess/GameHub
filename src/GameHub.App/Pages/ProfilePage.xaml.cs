@@ -43,7 +43,7 @@ public sealed partial class ProfilePage : Page
         {
             CurrentCover.Game = _current;
             CurrentTitle.Content = _current.Title;
-            CurrentInfo.Text = $"{Fmt.Hours(_current.PlaytimeMinutes)} jogadas · {_current.Status.ToDisplay()}";
+            CurrentInfo.Text = $"{Fmt.Hours(_current.TotalPlaytimeMinutes)} jogadas · {_current.Status.ToDisplay()}";
         }
 
         StTotal.Text = s.TotalGames.ToString();

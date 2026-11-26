@@ -79,8 +79,36 @@ public sealed class GameLauncher
         };
     }
 
+    /// <summary>Protocolos de launchers aceitos (nada de URLs arbitrárias).</summary>
+    public static readonly string[] AllowedUriSchemes =
+    {
+        "steam", "com.epicgames.launcher", "uplay", "goggalaxy", "battlenet", "origin2", "ea", "amazon-games", "riotclient", "xbox", "ms-xbl-",
+    };
+
+    public static bool IsAllowedLaunchUri(string? uri) =>
+        Uri.TryCreate(uri, UriKind.Absolute, out var u) &&
+        AllowedUriSchemes.Any(s => s.EndsWith('-') ? u.Scheme.StartsWith(s, StringComparison.OrdinalIgnoreCase) : u.Scheme.Equals(s, StringComparison.OrdinalIgnoreCase));
+
     public LaunchResult Launch(Game game)
     {
+        // Jogos de loja (Steam, Epic, Ubisoft…) iniciam pelo launcher oficial. O tempo fica com a plataforma,
+        // porque o processo do jogo não é filho do GameHub (medir aqui seria impreciso).
+        if (!string.IsNullOrWhiteSpace(game.LaunchUri))
+        {
+            if (!IsAllowedLaunchUri(game.LaunchUri))
+                return new(LaunchOutcome.Failed, "Atalho de inicialização não permitido. Edite o jogo e confira o link do launcher.");
+            try
+            {
+                _starter.Start(new ProcessStartInfo { FileName = game.LaunchUri, UseShellExecute = true });
+            }
+            catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+            {
+                return new(LaunchOutcome.Failed, $"Não foi possível abrir o launcher: {ex.Message}. Ele está instalado?");
+            }
+            _games.MarkLaunched(game.Id, _now());
+            return new(LaunchOutcome.Started, null, null);
+        }
+
         if (string.IsNullOrWhiteSpace(game.ExecutablePath))
             return new(LaunchOutcome.NoExecutableConfigured, "Este jogo ainda não tem executável. Edite o jogo e escolha o .exe.");
         if (!File.Exists(game.ExecutablePath))

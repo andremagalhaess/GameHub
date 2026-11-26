@@ -5,6 +5,7 @@ using GameHub.Core.Data;
 using GameHub.Core.Images;
 using GameHub.Core.Launching;
 using GameHub.Core.Metadata;
+using GameHub.Core.Platforms;
 using GameHub.Core.Security;
 
 namespace GameHub.App.Services;
@@ -15,6 +16,9 @@ public static class AppServices
     public static AppPaths Paths { get; private set; } = null!;
     public static Database Db { get; private set; } = null!;
     public static GameRepository Games { get; private set; } = null!;
+    public static GameSourceRepository Sources { get; private set; } = null!;
+    public static ReviewRepository Reviews { get; private set; } = null!;
+    public static LibraryImportService Importer { get; private set; } = null!;
     public static ProfileRepository Profiles { get; private set; } = null!;
     public static SettingsRepository Settings { get; private set; } = null!;
     public static SecretStore Secrets { get; private set; } = null!;
@@ -24,12 +28,20 @@ public static class AppServices
     public static BackupService Backup { get; private set; } = null!;
     public static HttpClient Http { get; private set; } = null!;
 
+    /// <summary>Nome exibido de cada varredura (a Web API da Steam aparece separada da detecção local).</summary>
+    public static string ScannerName(IPlatformScanner s) => s is SteamWebApiScanner ? "Steam (conta, via Web API)" : s is SteamLocalScanner ? "Steam (jogos instalados)" : s.Platform;
+
+    public static bool IsScannerEnabled(IPlatformScanner s) =>
+        s is SteamWebApiScanner web ? web.IsConfigured : Settings.GetBool(SettingKeys.PlatformEnabledPrefix + ScannerName(s), true);
+
     public static void Initialize()
     {
         Paths = new AppPaths();
         Db = new Database(Paths.DatabaseFile);
         Db.Migrate();
         Games = new GameRepository(Db);
+        Sources = new GameSourceRepository(Db);
+        Reviews = new ReviewRepository(Db);
         Profiles = new ProfileRepository(Db);
         Settings = new SettingsRepository(Db);
         Secrets = new SecretStore(Settings, new DpapiSecretProtector());
@@ -54,5 +66,17 @@ public static class AppServices
         Images = new ImageCache(Http, Paths.ImagesDir);
         Launcher = new GameLauncher(Games);
         Backup = new BackupService(Paths, Db);
+
+        var registry = new WindowsRegistry();
+        Importer = new LibraryImportService(Games, Sources, new IPlatformScanner[]
+        {
+            new SteamLocalScanner(registry),
+            new SteamWebApiScanner(Http, () => Secrets.Get(SettingKeys.SteamWebApiKey), () => Settings.Get(SettingKeys.SteamId)),
+            new EpicScanner(),
+            new GogScanner(registry),
+            new UbisoftScanner(registry),
+            new UninstallRegistryScanner(registry),
+            new XboxScanner(),
+        });
     }
 }
