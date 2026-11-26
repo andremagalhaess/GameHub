@@ -3,10 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Cor de destaque do GameHub. A cor é trocada em tempo de execução (Perfil/Configurações). -->
-    <SolidColorBrush x:Key="GhAccentBrush" Color="#7C5CFF" />
-    <SolidColorBrush x:Key="GhAccentSoftBrush" Color="#7C5CFF" Opacity="0.18" />
-
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="GhCardBrush" Color="#FFFFFF" Opacity="0.05" />
@@ -29,6 +25,11 @@
             <Color x:Key="GhPageFadeTransparent">#00F3F3F6</Color>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
+
+    <!-- Cor de destaque do GameHub. A cor é trocada em tempo de execução (Perfil/Configurações). -->
+    <SolidColorBrush x:Key="GhAccentBrush" Color="#7C5CFF" />
+    <SolidColorBrush x:Key="GhAccentSoftBrush" Color="#7C5CFF" Opacity="0.18" />
+
 
     <CornerRadius x:Key="GhCardRadius">12</CornerRadius>
     <CornerRadius x:Key="GhCoverRadius">10</CornerRadius>
