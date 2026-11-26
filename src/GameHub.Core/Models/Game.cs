@@ -68,6 +68,11 @@ public sealed class Game
     public string? StartedAt { get; set; }
     /// <summary>Data de conclusão (yyyy-MM-dd), informada pelo usuário.</summary>
     public string? FinishedAt { get; set; }
+    /// <summary>Estimativas do HowLongToBeat informadas pelo usuário (minutos). Null = não informado.</summary>
+    public long? HltbMainMinutes { get; set; }
+    public long? HltbExtraMinutes { get; set; }
+    public long? HltbCompleteMinutes { get; set; }
+    public bool HasHltb => HltbMainMinutes is > 0 || HltbExtraMinutes is > 0 || HltbCompleteMinutes is > 0;
     public DateTimeOffset? LastPlayedAt { get; set; }
     public DateTimeOffset AddedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;

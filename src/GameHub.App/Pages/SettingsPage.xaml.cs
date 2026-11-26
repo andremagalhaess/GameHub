@@ -260,4 +260,77 @@ public sealed partial class SettingsPage : Page
         Info.Message = message;
         Info.IsOpen = true;
     }
+
+    // ---------- Importar e exportar ----------
+
+    private void ShowExchange(InfoBarSeverity severity, string title, string message)
+    {
+        ExchangeInfo.Severity = severity;
+        ExchangeInfo.Title = title;
+        ExchangeInfo.Message = message;
+        ExchangeInfo.IsOpen = true;
+    }
+
+    private async void ExportAll_Click(object sender, RoutedEventArgs e)
+    {
+        var folder = await Pickers.PickFolderAsync();
+        if (folder is null) return;
+        ExchangeBusy.IsActive = true;
+        try
+        {
+            var files = await Task.Run(() => AppServices.Exchange.ExportAll(folder));
+            ShowExchange(InfoBarSeverity.Success, "Exportado", $"{files.Count} arquivos salvos em {folder}.");
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Falha ao exportar CSV", ex);
+            ShowExchange(InfoBarSeverity.Error, "Não foi possível exportar", ex.Message);
+        }
+        finally { ExchangeBusy.IsActive = false; }
+    }
+
+    private async void ExportBackloggd_Click(object sender, RoutedEventArgs e)
+    {
+        var path = await Pickers.SaveFileAsync("GameHub-avaliacoes-backloggd", "Planilha CSV", ".csv");
+        if (path is null) return;
+        try
+        {
+            await Task.Run(() => GameHub.Core.Text.Csv.WriteFile(path, AppServices.Exchange.BackloggdStyleRows(), ','));
+            ShowExchange(InfoBarSeverity.Success, "Exportado", path);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Falha ao exportar CSV", ex);
+            ShowExchange(InfoBarSeverity.Error, "Não foi possível exportar", ex.Message);
+        }
+    }
+
+    private async void Import_Click(object sender, RoutedEventArgs e)
+    {
+        var kind = (sender as FrameworkElement)?.Tag as string ?? "games";
+        var path = await Pickers.PickFileAsync(".csv", ".txt");
+        if (path is null) return;
+        ExchangeBusy.IsActive = true;
+        try
+        {
+            var text = await File.ReadAllTextAsync(path);
+            var x = AppServices.Exchange;
+            var result = await Task.Run(() => kind switch
+            {
+                "reviews" => x.ImportReviews(text),
+                "journey" => x.ImportJourney(text),
+                "rankings" => x.ImportRankings(text),
+                "backloggd" => x.ImportGames(text, new GameHub.Core.Exchange.GameImportOptions(GameHub.Core.Exchange.RatingScale.Auto, SkipWishlist: true, DefaultSource: "Backloggd")),
+                _ => x.ImportGames(text),
+            });
+            var details = result.Problems.Count == 0 ? "" : "\n" + string.Join("\n", result.Problems.Take(8)) + (result.Problems.Count > 8 ? $"\n… e mais {result.Problems.Count - 8}." : "");
+            ShowExchange(result.Problems.Count == 0 ? InfoBarSeverity.Success : InfoBarSeverity.Warning, "Importação concluída", result.Summary + details);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Falha ao importar CSV", ex);
+            ShowExchange(InfoBarSeverity.Error, "Não foi possível importar", ex.Message);
+        }
+        finally { ExchangeBusy.IsActive = false; }
+    }
 }

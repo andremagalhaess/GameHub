@@ -51,6 +51,9 @@ public sealed partial class GameEditor : UserControl
         DescriptionBox.Text = game.Description ?? "";
         StatusBox.SelectedIndex = GameStatusText.All.ToList().IndexOf(game.Status);
         HoursBox.Value = Math.Round(game.PlaytimeMinutes / 60.0, 1);
+        HltbMainBox.Value = ToHours(game.HltbMainMinutes);
+        HltbExtraBox.Value = ToHours(game.HltbExtraMinutes);
+        HltbCompleteBox.Value = ToHours(game.HltbCompleteMinutes);
         FavoriteBox.IsChecked = game.IsFavorite;
         ExeBox.Text = game.ExecutablePath ?? "";
         ArgsBox.Text = game.LaunchArguments ?? "";
@@ -189,6 +192,9 @@ public sealed partial class GameEditor : UserControl
         g.Status = (StatusBox.SelectedItem as ComboBoxItem)?.Tag is GameStatus s ? s : GameStatus.None;
         g.PlaytimeMinutes = double.IsNaN(HoursBox.Value) ? 0 : (long)Math.Round(HoursBox.Value * 60);
         g.IsFavorite = FavoriteBox.IsChecked == true;
+        g.HltbMainMinutes = ToMinutes(HltbMainBox.Value);
+        g.HltbExtraMinutes = ToMinutes(HltbExtraBox.Value);
+        g.HltbCompleteMinutes = ToMinutes(HltbCompleteBox.Value);
         g.ExecutablePath = NullIfEmpty(ExeBox.Text.Trim().Trim('"'));
         g.LaunchArguments = NullIfEmpty(ArgsBox.Text);
         g.LaunchUri = NullIfEmpty(LaunchUriBox.Text);
@@ -227,4 +233,10 @@ public sealed partial class GameEditor : UserControl
     }
 
     private static string? NullIfEmpty(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
+    private static double ToHours(long? minutes) => minutes is > 0 ? Math.Round(minutes.Value / 60.0, 1) : double.NaN;
+    private static long? ToMinutes(double hours) => double.IsNaN(hours) || hours <= 0 ? null : (long)Math.Round(hours * 60);
+
+    private void OpenHltb_Click(object sender, RoutedEventArgs e) =>
+        GameHub.App.Helpers.WebLinks.Open(GameHub.App.Helpers.WebLinks.HowLongToBeat(TitleBox.Text));
 }

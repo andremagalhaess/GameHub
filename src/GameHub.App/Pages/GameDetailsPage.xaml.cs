@@ -79,6 +79,14 @@ public sealed partial class GameDetailsPage : Page
 
         LoadReview(g);
         LoadMemories(g);
+        HltbMain.Text = g.HltbMainMinutes is > 0 ? Fmt.Hours(g.HltbMainMinutes.Value) : "—";
+        HltbExtra.Text = g.HltbExtraMinutes is > 0 ? Fmt.Hours(g.HltbExtraMinutes.Value) : "—";
+        HltbComplete.Text = g.HltbCompleteMinutes is > 0 ? Fmt.Hours(g.HltbCompleteMinutes.Value) : "—";
+        HltbGrid.Visibility = g.HasHltb ? Visibility.Visible : Visibility.Collapsed;
+        HltbSource.Visibility = HltbGrid.Visibility;
+        HltbEmpty.Visibility = g.HasHltb ? Visibility.Collapsed : Visibility.Visible;
+        HltbLink.NavigateUri = WebLinks.HowLongToBeat(g.Title);
+        BackloggdLink.NavigateUri = WebLinks.Backloggd(g.Title);
         LoadPlatforms(g);
         _loading = false;
     }

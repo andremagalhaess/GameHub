@@ -178,6 +178,24 @@
                         <Border Style="{StaticResource GhCard}">
                             <StackPanel x:Name="FactsPanel" Spacing="12" />
                         </Border>
+                        <Border Style="{StaticResource GhCard}">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Quanto tempo leva" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                <Grid x:Name="HltbGrid" ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock x:Name="HltbMain" FontSize="20" FontWeight="SemiBold" /><TextBlock Text="História" Style="{StaticResource GhMuted}" FontSize="12" /></StackPanel>
+                                    <StackPanel Grid.Column="1"><TextBlock x:Name="HltbExtra" FontSize="20" FontWeight="SemiBold" /><TextBlock Text="Com extras" Style="{StaticResource GhMuted}" FontSize="12" /></StackPanel>
+                                    <StackPanel Grid.Column="2"><TextBlock x:Name="HltbComplete" FontSize="20" FontWeight="SemiBold" /><TextBlock Text="Complecionista" Style="{StaticResource GhMuted}" FontSize="12" /></StackPanel>
+                                </Grid>
+                                <TextBlock x:Name="HltbEmpty" Style="{StaticResource GhMuted}" FontSize="12" TextWrapping="Wrap"
+                                           Text="Sem estimativas. Confira no HowLongToBeat e informe as horas em Editar." />
+                                <TextBlock x:Name="HltbSource" Text="Estimativas do HowLongToBeat informadas por você." Style="{StaticResource GhMuted}" FontSize="12" TextWrapping="Wrap" />
+                                <StackPanel Orientation="Horizontal" Spacing="16">
+                                    <HyperlinkButton x:Name="HltbLink" Content="HowLongToBeat" Padding="0" />
+                                    <HyperlinkButton x:Name="BackloggdLink" Content="Backloggd" Padding="0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
                         <Border x:Name="PlatformsCard" Style="{StaticResource GhCard}" Visibility="Collapsed">
                             <StackPanel Spacing="10">
                                 <TextBlock Text="Plataformas vinculadas" Style="{StaticResource BodyStrongTextBlockStyle}" />

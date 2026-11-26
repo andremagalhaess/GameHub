@@ -229,5 +229,13 @@ public sealed class Database
             ('Melhores experiências multiplayer', NULL, NULL, 1, 6, '2026-01-01T00:00:00+00:00'),
             ('Jogos mais marcantes', NULL, NULL, 1, 7, '2026-01-01T00:00:00+00:00');
         """,
+
+        // v4 — Prioridade 4: estimativas do HowLongToBeat (informadas pelo usuário) e índice para sessões importadas
+        """
+        ALTER TABLE games ADD COLUMN hltb_main_minutes INTEGER;
+        ALTER TABLE games ADD COLUMN hltb_extra_minutes INTEGER;
+        ALTER TABLE games ADD COLUMN hltb_complete_minutes INTEGER;
+        CREATE INDEX IF NOT EXISTS ix_sessions_game_start ON play_sessions(game_id, started_at);
+        """,
     };
 }

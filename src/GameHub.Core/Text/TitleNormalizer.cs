@@ -19,6 +19,14 @@ public static class TitleNormalizer
         "edicao", "definitiva", "completa", "remasterizado", "remasterizada",
     };
 
+    public static string StripAccents(string text)
+    {
+        var sb = new StringBuilder(text.Length);
+        foreach (var ch in text.Normalize(NormalizationForm.FormD))
+            if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark) sb.Append(ch);
+        return sb.ToString().Normalize(NormalizationForm.FormC);
+    }
+
     /// <summary>Forma canônica: minúsculas, sem acentos/pontuação, números romanos → arábicos, sem palavras de edição.</summary>
     public static string Normalize(string? title)
     {

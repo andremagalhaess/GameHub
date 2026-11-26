@@ -48,6 +48,21 @@
             </StackPanel>
         </Border>
 
+        <!-- HowLongToBeat -->
+        <Border Style="{StaticResource GhCard}" Padding="20">
+            <StackPanel Spacing="12">
+                <TextBlock Text="Duração estimada (HowLongToBeat)" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock Style="{StaticResource GhMuted}" TextWrapping="Wrap"
+                           Text="O HowLongToBeat não oferece API pública. Abra a página do jogo no site, confira as estimativas e copie as horas aqui. Deixe vazio o que não souber." />
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <NumberBox x:Name="HltbMainBox" Header="História principal (h)" Minimum="0" Maximum="5000" SmallChange="0.5" SpinButtonPlacementMode="Compact" MinWidth="170" />
+                    <NumberBox x:Name="HltbExtraBox" Header="Com extras (h)" Minimum="0" Maximum="5000" SmallChange="0.5" SpinButtonPlacementMode="Compact" MinWidth="150" />
+                    <NumberBox x:Name="HltbCompleteBox" Header="Complecionista (h)" Minimum="0" Maximum="5000" SmallChange="0.5" SpinButtonPlacementMode="Compact" MinWidth="160" />
+                    <HyperlinkButton Content="Abrir no HowLongToBeat" Click="OpenHltb_Click" VerticalAlignment="Bottom" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
         <!-- Execução -->
         <Border Style="{StaticResource GhCard}" Padding="20">
             <StackPanel Spacing="14">

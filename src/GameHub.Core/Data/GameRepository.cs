@@ -235,6 +235,38 @@ public sealed class GameRepository
         tx.Commit();
     }
 
+    /// <summary>
+    /// Insere uma sessão vinda de importação, sem duplicar (mesmo jogo e mesmo início).
+    /// O tempo medido do jogo passa a ser no mínimo a soma das sessões (não soma duas vezes quando
+    /// jogos e jornada são importados juntos). Retorna true se inseriu.
+    /// </summary>
+    public bool ImportSession(long gameId, DateTimeOffset start, DateTimeOffset end, long minutes)
+    {
+        using var c = _db.Open();
+        using var tx = c.BeginTransaction();
+        using (var check = c.CreateCommand())
+        {
+            check.Transaction = tx;
+            check.CommandText = "SELECT COUNT(*) FROM play_sessions WHERE game_id = @g AND started_at = @s;";
+            check.Add("@g", gameId); check.Add("@s", start.ToDb());
+            if ((long)check.ExecuteScalar()! > 0) return false;
+        }
+        minutes = Math.Max(0, minutes);
+        using (var cmd = c.CreateCommand())
+        {
+            cmd.Transaction = tx;
+            cmd.CommandText = """
+                INSERT INTO play_sessions (game_id, started_at, ended_at, minutes) VALUES (@g, @s, @e, @m);
+                UPDATE games SET playtime_minutes = MAX(playtime_minutes, (SELECT COALESCE(SUM(minutes), 0) FROM play_sessions WHERE game_id = @g))
+                WHERE id = @g;
+                """;
+            cmd.Add("@g", gameId); cmd.Add("@s", start.ToDb()); cmd.Add("@e", end.ToDb()); cmd.Add("@m", minutes);
+            cmd.ExecuteNonQuery();
+        }
+        tx.Commit();
+        return true;
+    }
+
     public void MarkLaunched(long gameId, DateTimeOffset when) =>
         Exec("UPDATE games SET last_played_at = @v, updated_at = @u WHERE id = @id;", gameId, when.ToDb());
 
@@ -339,6 +371,7 @@ public sealed class GameRepository
         "launch_arguments", "working_directory", "source", "source_id", "metadata_provider", "metadata_id", "status",
         "is_favorite", "personal_rating", "playtime_minutes", "last_played_at", "added_at", "updated_at",
         "launch_uri", "started_at", "finished_at", "platform_playtime_minutes",
+        "hltb_main_minutes", "hltb_extra_minutes", "hltb_complete_minutes",
     };
     private static readonly string Columns = string.Join(", ", ColumnList);
     private static readonly string Params = string.Join(", ", ColumnList.Select(c => "@" + c));
@@ -385,6 +418,9 @@ public sealed class GameRepository
         cmd.Add("@started_at", g.StartedAt.ToDb());
         cmd.Add("@finished_at", g.FinishedAt.ToDb());
         cmd.Add("@platform_playtime_minutes", Math.Max(0, g.PlatformPlaytimeMinutes));
+        cmd.Add("@hltb_main_minutes", g.HltbMainMinutes is > 0 ? g.HltbMainMinutes.Value : DBNull.Value);
+        cmd.Add("@hltb_extra_minutes", g.HltbExtraMinutes is > 0 ? g.HltbExtraMinutes.Value : DBNull.Value);
+        cmd.Add("@hltb_complete_minutes", g.HltbCompleteMinutes is > 0 ? g.HltbCompleteMinutes.Value : DBNull.Value);
     }
 
     private static Game Read(SqliteDataReader r) => new()
@@ -427,5 +463,8 @@ public sealed class GameRepository
         StartedAt = r.Str("started_at"),
         FinishedAt = r.Str("finished_at"),
         PlatformPlaytimeMinutes = r.Long("platform_playtime_minutes") ?? 0,
+        HltbMainMinutes = r.Long("hltb_main_minutes"),
+        HltbExtraMinutes = r.Long("hltb_extra_minutes"),
+        HltbCompleteMinutes = r.Long("hltb_complete_minutes"),
     };
 }

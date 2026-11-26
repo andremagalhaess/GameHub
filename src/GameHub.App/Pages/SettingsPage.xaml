@@ -157,6 +157,37 @@
                 </StackPanel>
             </Border>
 
+            <!-- Importar e exportar -->
+            <TextBlock Text="Importar e exportar" Style="{StaticResource GhSectionTitle}" />
+            <Border Style="{StaticResource GhCard}">
+                <StackPanel Spacing="12">
+                    <TextBlock Style="{StaticResource GhMuted}" TextWrapping="Wrap"
+                               Text="Planilhas CSV (abrem no Excel). Exportar tudo gera quatro arquivos: jogos, reviews, jornada (datas, sessões e memórias) e rankings. Ao importar, jogos com o mesmo nome são atualizados em vez de duplicados, e nada é executado." />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <ProgressRing x:Name="ExchangeBusy" IsActive="False" Width="20" Height="20" />
+                        <Button Content="Exportar tudo (CSV)…" Click="ExportAll_Click" Style="{StaticResource GhPrimaryButton}" />
+                        <DropDownButton Content="Importar CSV">
+                            <DropDownButton.Flyout>
+                                <MenuFlyout Placement="Bottom">
+                                    <MenuFlyoutItem Text="Jogos (GameHub ou planilha própria)…" Tag="games" Click="Import_Click" />
+                                    <MenuFlyoutItem Text="Reviews…" Tag="reviews" Click="Import_Click" />
+                                    <MenuFlyoutItem Text="Jornada (datas, sessões e memórias)…" Tag="journey" Click="Import_Click" />
+                                    <MenuFlyoutItem Text="Rankings…" Tag="rankings" Click="Import_Click" />
+                                </MenuFlyout>
+                            </DropDownButton.Flyout>
+                        </DropDownButton>
+                    </StackPanel>
+                    <TextBlock Text="Backloggd" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,6,0,0" />
+                    <TextBlock Style="{StaticResource GhMuted}" TextWrapping="Wrap"
+                               Text="O Backloggd não tem API pública, então não há sincronização automática. Você pode importar um CSV exportado do Backloggd (notas de 0,5 a 5 estrelas viram 1 a 10; jogos da wishlist são ignorados) e exportar suas avaliações e seu histórico num CSV com colunas em inglês para usar lá ou em outra ferramenta." />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Importar CSV do Backloggd…" Tag="backloggd" Click="Import_Click" />
+                        <Button Content="Exportar avaliações e histórico (CSV)…" Click="ExportBackloggd_Click" />
+                    </StackPanel>
+                    <InfoBar x:Name="ExchangeInfo" IsOpen="False" IsClosable="True" />
+                </StackPanel>
+            </Border>
+
             <!-- Sobre -->
             <TextBlock Text="Sobre" Style="{StaticResource GhSectionTitle}" />
             <Border Style="{StaticResource GhCard}">

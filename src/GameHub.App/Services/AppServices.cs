@@ -2,6 +2,7 @@ using System.Net;
 using GameHub.Core;
 using GameHub.Core.Backup;
 using GameHub.Core.Data;
+using GameHub.Core.Exchange;
 using GameHub.Core.Images;
 using GameHub.Core.Journey;
 using GameHub.Core.Launching;
@@ -22,6 +23,7 @@ public static class AppServices
     public static MemoryRepository Memories { get; private set; } = null!;
     public static RankingRepository Rankings { get; private set; } = null!;
     public static JourneyService Journey { get; private set; } = null!;
+    public static CsvExchange Exchange { get; private set; } = null!;
     public static LibraryImportService Importer { get; private set; } = null!;
     public static ProfileRepository Profiles { get; private set; } = null!;
     public static SettingsRepository Settings { get; private set; } = null!;
@@ -49,6 +51,7 @@ public static class AppServices
         Memories = new MemoryRepository(Db);
         Rankings = new RankingRepository(Db, Games);
         Journey = new JourneyService(Games, Reviews, Memories);
+        Exchange = new CsvExchange(Games, Reviews, Memories, Rankings);
         Profiles = new ProfileRepository(Db);
         Settings = new SettingsRepository(Db);
         Secrets = new SecretStore(Settings, new DpapiSecretProtector());
