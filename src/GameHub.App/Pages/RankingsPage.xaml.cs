@@ -77,7 +77,7 @@ public sealed partial class RankingsPage : Page
     private void Show(Ranking? r)
     {
         _current = r;
-        Info.IsOpen = false;
+        InfoMsg.IsOpen = false;
         RTitle.Text = r is null ? "Nenhum ranking" : DisplayName(r);
         RDescription.Text = r?.Description ?? (r?.MaxItems is { } m ? $"Até {m} jogos." : "");
         RDescription.Visibility = string.IsNullOrWhiteSpace(RDescription.Text) ? Visibility.Collapsed : Visibility.Visible;
@@ -171,16 +171,16 @@ public sealed partial class RankingsPage : Page
         }
         sender.Text = "";
         sender.ItemsSource = null;
-        Info.IsOpen = false;
+        InfoMsg.IsOpen = false;
         LoadEntries();
         RefreshListInfo();
     }
 
     private void ShowInfo(InfoBarSeverity severity, string message)
     {
-        Info.Severity = severity;
-        Info.Message = message;
-        Info.IsOpen = true;
+        InfoMsg.Severity = severity;
+        InfoMsg.Message = message;
+        InfoMsg.IsOpen = true;
     }
 
     // ---------- Criar / editar / apagar ----------

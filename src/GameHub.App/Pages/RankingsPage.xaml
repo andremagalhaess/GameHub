@@ -62,7 +62,7 @@
             </Grid>
             <AutoSuggestBox x:Name="AddBox" Grid.Row="1" PlaceholderText="Adicionar jogo da biblioteca…" QueryIcon="Add" MaxWidth="520" HorizontalAlignment="Left" Width="520"
                             TextChanged="AddBox_TextChanged" SuggestionChosen="AddBox_SuggestionChosen" QuerySubmitted="AddBox_QuerySubmitted" DisplayMemberPath="Title" TextMemberPath="Title" />
-            <InfoBar x:Name="Info" Grid.Row="2" IsOpen="False" />
+            <InfoBar x:Name="InfoMsg" Grid.Row="2" IsOpen="False" />
             <Grid Grid.Row="3">
                 <ListView x:Name="EntryList" SelectionMode="None" CanReorderItems="True" CanDragItems="True" AllowDrop="True"
                           DragItemsCompleted="EntryList_DragItemsCompleted" IsItemClickEnabled="True" ItemClick="EntryList_ItemClick" Padding="0,0,0,32">
